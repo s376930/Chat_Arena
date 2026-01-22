@@ -1,0 +1,17 @@
+{
+  "topics": [
+    {"id": 1, "text": "Discuss the ethics of AI in healthcare"},
+    {"id": 2, "text": "Debate: Remote work vs office work"},
+    {"id": 3, "text": "Should social media platforms be regulated?"},
+    {"id": 4, "text": "The future of renewable energy"},
+    {"id": 5, "text": "Is universal basic income a good idea?"}
+  ],
+  "tasks": [
+    {"id": 1, "text": "Try to change your partner's opinion"},
+    {"id": 2, "text": "Ask at least 3 questions during the conversation"},
+    {"id": 3, "text": "Use formal language throughout"},
+    {"id": 4, "text": "Share a personal experience related to the topic"},
+    {"id": 5, "text": "Summarize your partner's main points before responding"},
+    {"id": 6, "text": "Play devil's advocate regardless of your actual opinion"}
+  ]
+}

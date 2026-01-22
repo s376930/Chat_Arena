@@ -1,0 +1,10 @@
+{
+  "title": "Research Participation Consent",
+  "version": "1.0",
+  "content": "Thank you for your interest in participating in this research study. This study aims to understand how people communicate and collaborate in online conversations.\n\nBy participating, you agree to:\n- Have your conversation messages recorded and stored for research purposes\n- Allow researchers to analyze the content of your conversations\n- Understand that your identity will remain anonymous\n\nYour participation is voluntary. You may leave at any time without penalty.",
+  "checkboxes": [
+    "I am 18 years or older",
+    "I consent to data collection for research purposes",
+    "I understand my conversations will be recorded"
+  ]
+}

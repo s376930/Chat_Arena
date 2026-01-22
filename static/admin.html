@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Arena - Admin</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <h1>Chat Arena Admin</h1>
+            <a href="/" class="btn btn-secondary">Back to Chat</a>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Topics Section -->
+            <section class="admin-section">
+                <div class="section-header">
+                    <h2>Conversation Topics</h2>
+                    <button id="add-topic-btn" class="btn btn-primary btn-small">+ Add Topic</button>
+                </div>
+                <div id="topics-list" class="items-list">
+                    <!-- Topics will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Tasks Section -->
+            <section class="admin-section">
+                <div class="section-header">
+                    <h2>Hidden Tasks</h2>
+                    <button id="add-task-btn" class="btn btn-primary btn-small">+ Add Task</button>
+                </div>
+                <div id="tasks-list" class="items-list">
+                    <!-- Tasks will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Consent Section -->
+            <section class="admin-section">
+                <div class="section-header">
+                    <h2>Consent Form</h2>
+                </div>
+                <div class="consent-form">
+                    <div class="form-group">
+                        <label for="consent-title">Title</label>
+                        <input type="text" id="consent-title" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="consent-version">Version</label>
+                        <input type="text" id="consent-version" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="consent-content">Content</label>
+                        <textarea id="consent-content" class="form-textarea" rows="6"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Checkboxes</label>
+                        <div id="consent-checkboxes-list" class="checkboxes-list">
+                            <!-- Checkboxes will be loaded here -->
+                        </div>
+                        <button id="add-checkbox-btn" class="btn btn-secondary btn-small">+ Add Checkbox</button>
+                    </div>
+                    <div class="form-actions">
+                        <button id="save-consent-btn" class="btn btn-primary">Save Consent Form</button>
+                        <button id="preview-consent-btn" class="btn btn-secondary">Preview</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Edit Modal -->
+        <div id="edit-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="edit-modal-title">Edit Item</h3>
+                <div class="form-group">
+                    <label for="edit-input">Text</label>
+                    <textarea id="edit-input" class="form-textarea" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button id="edit-cancel-btn" class="btn btn-secondary">Cancel</button>
+                    <button id="edit-save-btn" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consent Preview Modal -->
+        <div id="preview-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="preview-title">Consent Preview</h2>
+                <div id="preview-content" class="preview-content"></div>
+                <div id="preview-checkboxes" class="preview-checkboxes"></div>
+                <div class="modal-actions">
+                    <button id="preview-close-btn" class="btn btn-primary">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast hidden"></div>
+    </div>
+
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>

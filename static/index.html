@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Arena</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Consent Modal -->
+    <div id="consent-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="consent-title">Research Participation Consent</h2>
+            <div id="consent-text" class="consent-text"></div>
+            <div id="consent-checkboxes" class="consent-checkboxes"></div>
+            <button id="consent-btn" class="btn btn-primary" disabled>I Agree & Continue</button>
+        </div>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div id="instructions-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>How to Use Chat Arena</h2>
+            <div class="instructions-content">
+                <h3>Getting Started</h3>
+                <ol>
+                    <li>After agreeing to the consent form, you'll be placed in a queue</li>
+                    <li>Once paired with another participant, you'll both receive a conversation topic</li>
+                    <li>You'll also receive a hidden task that only you can see</li>
+                </ol>
+
+                <h3>Sending Messages</h3>
+                <ol>
+                    <li><strong>Think:</strong> Write your private thoughts first (minimum 10 characters). This is not shown to your partner but is recorded for research.</li>
+                    <li><strong>Speech:</strong> Write what you want to send to your partner. This field is enabled after you've written enough in the Think field.</li>
+                    <li>Click <strong>Send</strong> or press <strong>Ctrl+Enter</strong> to send your message.</li>
+                </ol>
+
+                <h3>Speech-to-Text</h3>
+                <p>Click the microphone icon to use speech-to-text. Your browser may ask for microphone permission.</p>
+
+                <h3>Other Controls</h3>
+                <ul>
+                    <li><strong>Find New Partner:</strong> Leave current conversation and find a new partner</li>
+                    <li><strong>Dark/Light Mode:</strong> Toggle theme using the button in the header</li>
+                </ul>
+            </div>
+            <button id="close-instructions-btn" class="btn btn-primary">Got It</button>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">Chat Arena</h1>
+                <span id="connection-status" class="status-indicator disconnected" title="Connection status"></span>
+            </div>
+            <div id="topic-banner" class="topic-banner hidden">
+                <span id="topic-text"></span>
+            </div>
+            <div class="header-right">
+                <button id="theme-toggle" class="btn btn-icon" title="Toggle dark/light mode">
+                    <span class="theme-icon-light">&#9728;</span>
+                    <span class="theme-icon-dark hidden">&#9790;</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Task Reminder Bar -->
+        <div id="task-bar" class="task-bar hidden">
+            <div class="task-content">
+                <span class="task-label">Your Task:</span>
+                <span id="task-text"></span>
+            </div>
+            <button id="task-toggle" class="btn btn-icon btn-small" title="Toggle task visibility">
+                <span class="collapse-icon">&#9650;</span>
+            </button>
+        </div>
+
+        <!-- Waiting Screen -->
+        <div id="waiting-screen" class="waiting-screen hidden">
+            <div class="waiting-content">
+                <div class="spinner"></div>
+                <h2>Waiting for a partner...</h2>
+                <p>Position in queue: <span id="queue-position">1</span></p>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div id="chat-container" class="chat-container hidden">
+            <!-- Chat Messages -->
+            <div id="chat-messages" class="chat-messages"></div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <!-- Think Input -->
+                <div class="input-group">
+                    <label for="think-input">
+                        Think <span class="hint">(private - not shown to partner)</span>
+                    </label>
+                    <div class="textarea-wrapper">
+                        <textarea
+                            id="think-input"
+                            placeholder="Write your private thoughts here (minimum 10 characters)..."
+                            rows="2"
+                        ></textarea>
+                        <button id="think-mic-btn" class="btn btn-icon btn-mic" title="Speech to text">
+                            &#127908;
+                        </button>
+                    </div>
+                    <div class="char-count">
+                        <span id="think-char-count">0</span>/10 characters
+                    </div>
+                </div>
+
+                <!-- Speech Input -->
+                <div class="input-group">
+                    <label for="speech-input">
+                        Speech <span class="hint">(sent to partner)</span>
+                    </label>
+                    <div class="textarea-wrapper">
+                        <textarea
+                            id="speech-input"
+                            placeholder="Write what you want to say to your partner..."
+                            rows="2"
+                            disabled
+                        ></textarea>
+                        <button id="speech-mic-btn" class="btn btn-icon btn-mic" title="Speech to text" disabled>
+                            &#127908;
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Send Button -->
+                <div class="send-area">
+                    <button id="send-btn" class="btn btn-primary btn-send" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Controls -->
+        <footer class="footer">
+            <button id="reassign-btn" class="btn btn-secondary" disabled>
+                &#128260; Find New Partner
+            </button>
+            <button id="instructions-btn" class="btn btn-secondary">
+                &#10067; Instructions
+            </button>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/websocket.js"></script>
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/speech.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
