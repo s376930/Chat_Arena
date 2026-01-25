@@ -12,6 +12,8 @@ const UI = {
         // Modals
         this.elements.consentModal = document.getElementById('consent-modal');
         this.elements.instructionsModal = document.getElementById('instructions-modal');
+        this.elements.inactivityModal = document.getElementById('inactivity-modal');
+        this.elements.returnBtn = document.getElementById('return-btn');
         this.elements.consentTitle = document.getElementById('consent-title');
         this.elements.consentText = document.getElementById('consent-text');
         this.elements.consentCheckboxes = document.getElementById('consent-checkboxes');
@@ -335,6 +337,29 @@ const UI = {
      */
     showError(message) {
         alert(message); // Simple alert for now
+    },
+
+    /**
+     * Show inactivity screen
+     */
+    showInactivityScreen() {
+        // Hide everything else
+        this.elements.waitingScreen.classList.add('hidden');
+        this.elements.chatContainer.classList.add('hidden');
+        this.elements.taskBar.classList.add('hidden');
+        this.elements.topicBanner.classList.add('hidden');
+        this.elements.app.classList.add('hidden');
+
+        // Show inactivity modal
+        this.elements.inactivityModal.classList.remove('hidden');
+    },
+
+    /**
+     * Hide inactivity screen and return to app
+     */
+    hideInactivityScreen() {
+        this.elements.inactivityModal.classList.add('hidden');
+        this.elements.app.classList.remove('hidden');
     }
 };
 

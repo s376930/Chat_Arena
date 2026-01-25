@@ -1,16 +1,19 @@
 import asyncio
+import io
 import json
 import logging
 import os
+import zipfile
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Header, Depends
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from pydantic import BaseModel
 
-from .config import MIN_THINK_CHARS, OPENAI_API_KEY, BASE_DIR, LLM_CONFIG_FILE, PERSONAS_FILE
+from .config import MIN_THINK_CHARS, OPENAI_API_KEY, BASE_DIR, LLM_CONFIG_FILE, PERSONAS_FILE, ADMIN_PASSWORD, DATA_DIR, CONVERSATIONS_DIR, INACTIVITY_TIMEOUT_SECONDS
 from .websocket_manager import manager
 from .pairing_service import pairing_service
 from .storage_service import storage_service
@@ -115,6 +118,9 @@ async def pair_with_ai(user_id: str) -> bool:
             is_ai_partner=True
         )
 
+        # Set initial activity timestamp
+        manager.update_activity(user_id)
+
         # Create AI session record in websocket manager
         manager.create_ai_session(
             ai_id=ai_id,
@@ -178,6 +184,77 @@ async def delayed_pairing(user_id: str, delay_seconds: int):
                 await pair_with_ai(user_id)
 
 
+async def check_inactive_users():
+    """Background task to check for and kick inactive users."""
+    while True:
+        await asyncio.sleep(60)  # Check every minute
+
+        inactive_users = manager.get_inactive_users(INACTIVITY_TIMEOUT_SECONDS)
+
+        for user_id in inactive_users:
+            logger.info(f"Kicking inactive user: {user_id}")
+            await handle_inactivity_kick(user_id)
+
+
+async def handle_inactivity_kick(user_id: str):
+    """Handle kicking a user due to inactivity."""
+    global ai_manager
+
+    session = manager.get_session(user_id)
+
+    if not session:
+        return
+
+    # Notify the inactive user
+    await manager.send_json(user_id, {"type": "inactivity_kick"})
+
+    if session.paired:
+        partner_id = session.partner_id
+        session_id = session.session_id
+        is_ai_partner = session.is_ai_partner
+
+        if partner_id:
+            # Handle AI partner differently
+            if is_ai_partner and ai_manager:
+                # Remove AI participant
+                await ai_manager.remove_ai_participant(partner_id)
+                manager.remove_ai_session(partner_id)
+            else:
+                # Notify human partner
+                await manager.send_json(partner_id, {"type": "partner_left"})
+                manager.clear_pairing(partner_id)
+
+                # Add delay for partner if enabled
+                if ai_manager and ai_manager.pairing_delay_enabled:
+                    pairing_service.add_delay(partner_id)
+
+                # Put partner back in queue
+                position = pairing_service.add_to_queue(partner_id)
+                await manager.send_json(partner_id, {
+                    "type": "waiting",
+                    "position": position
+                })
+
+                # Schedule delayed pairing for partner
+                if ai_manager and ai_manager.pairing_delay_enabled:
+                    asyncio.create_task(
+                        delayed_pairing(partner_id, ai_manager.reassign_delay_seconds)
+                    )
+                else:
+                    await try_pairing(partner_id)
+
+        # End conversation if exists
+        if session_id:
+            await storage_service.end_conversation(session_id)
+
+    # Remove user from queue and clear their session (but don't fully disconnect)
+    pairing_service.remove_from_queue(user_id)
+    pairing_service.remove_delay(user_id)
+    manager.clear_pairing(user_id)
+    # Reset their consent status so they need to rejoin
+    manager.update_session(user_id, consented=False, last_activity=None)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager for startup/shutdown."""
@@ -200,10 +277,19 @@ async def lifespan(app: FastAPI):
 
     logger.info("AI Manager initialized")
 
+    # Start background task for checking inactive users
+    inactivity_task = asyncio.create_task(check_inactive_users())
+    logger.info(f"Inactivity checker started (timeout: {INACTIVITY_TIMEOUT_SECONDS}s)")
+
     yield
 
     # Shutdown
     logger.info("Shutting down Chat Arena server...")
+    inactivity_task.cancel()
+    try:
+        await inactivity_task
+    except asyncio.CancelledError:
+        pass
     if ai_manager:
         await ai_manager.shutdown()
 
@@ -280,6 +366,7 @@ async def handle_join(user_id: str, data: dict):
         return
 
     manager.update_session(user_id, consented=True)
+    manager.update_activity(user_id)  # Track activity
 
     # Add to queue
     position = pairing_service.add_to_queue(user_id)
@@ -334,6 +421,10 @@ async def try_pairing(user_id: str):
     manager.update_session(user_id, paired=True, partner_id=partner_id, session_id=session_id, task=tasks[0].text)
     manager.update_session(partner_id, paired=True, partner_id=user_id, session_id=session_id, task=tasks[1].text)
 
+    # Set initial activity timestamp for both users
+    manager.update_activity(user_id)
+    manager.update_activity(partner_id)
+
     # Create conversation in storage
     storage_service.create_conversation(
         session_id=session_id,
@@ -372,6 +463,9 @@ async def handle_chat_message(user_id: str, data: dict):
             "message": "You are not in an active chat session"
         })
         return
+
+    # Update activity timestamp
+    manager.update_activity(user_id)
 
     think = data.get("think", "")
     speech = data.get("speech", "")
@@ -666,3 +760,274 @@ async def update_consent(consent: ConsentData):
     if not success:
         raise HTTPException(status_code=500, detail="Failed to save consent")
     return consent.model_dump()
+
+
+# ==================== Protected Admin API ====================
+
+def verify_admin_password(x_admin_password: str = Header(None)):
+    """Verify admin password from header."""
+    if x_admin_password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Invalid admin password")
+    return True
+
+
+class FileContent(BaseModel):
+    content: str
+
+
+@app.post("/api/admin/auth")
+async def admin_auth(x_admin_password: str = Header(None)):
+    """Authenticate admin access."""
+    if x_admin_password == ADMIN_PASSWORD:
+        return {"authenticated": True}
+    raise HTTPException(status_code=401, detail="Invalid password")
+
+
+@app.get("/api/admin/data-files")
+async def list_data_files(authorized: bool = Depends(verify_admin_password)):
+    """List all JSON files in the data folder (excluding conversations)."""
+    files = []
+    for f in DATA_DIR.iterdir():
+        if f.is_file() and f.suffix == '.json':
+            stat = f.stat()
+            files.append({
+                "name": f.name,
+                "size": stat.st_size,
+                "modified": datetime.fromtimestamp(stat.st_mtime).isoformat()
+            })
+    return sorted(files, key=lambda x: x["name"])
+
+
+@app.get("/api/admin/data-files/{filename}")
+async def get_data_file(filename: str, authorized: bool = Depends(verify_admin_password)):
+    """Get content of a specific data file."""
+    # Prevent path traversal
+    if '..' in filename or '/' in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    filepath = DATA_DIR / filename
+    if not filepath.exists() or not filepath.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    try:
+        with open(filepath, 'r') as f:
+            content = f.read()
+        return {"name": filename, "content": content}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read file: {str(e)}")
+
+
+@app.put("/api/admin/data-files/{filename}")
+async def update_data_file(filename: str, file_content: FileContent, authorized: bool = Depends(verify_admin_password)):
+    """Update content of a specific data file."""
+    # Prevent path traversal
+    if '..' in filename or '/' in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    filepath = DATA_DIR / filename
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    try:
+        # Validate JSON
+        json.loads(file_content.content)
+
+        with open(filepath, 'w') as f:
+            f.write(file_content.content)
+
+        # Reload topics/tasks if that file was updated
+        if filename == 'topics_tasks.json':
+            pairing_service.reload_topics_tasks()
+
+        return {"status": "updated", "name": filename}
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid JSON: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+
+
+@app.get("/api/admin/data-files/{filename}/download")
+async def download_data_file(filename: str, authorized: bool = Depends(verify_admin_password)):
+    """Download a specific data file."""
+    # Prevent path traversal
+    if '..' in filename or '/' in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    filepath = DATA_DIR / filename
+    if not filepath.exists() or not filepath.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    return FileResponse(
+        path=str(filepath),
+        filename=filename,
+        media_type='application/json'
+    )
+
+
+@app.post("/api/admin/data-files/upload")
+async def upload_data_file(file: UploadFile = File(...), authorized: bool = Depends(verify_admin_password)):
+    """Upload a new data file."""
+    if not file.filename.endswith('.json'):
+        raise HTTPException(status_code=400, detail="Only JSON files are allowed")
+
+    # Prevent path traversal
+    if '..' in file.filename or '/' in file.filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    try:
+        content = await file.read()
+        # Validate JSON
+        json.loads(content.decode('utf-8'))
+
+        filepath = DATA_DIR / file.filename
+        with open(filepath, 'wb') as f:
+            f.write(content)
+
+        return {"status": "uploaded", "name": file.filename}
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid JSON: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload file: {str(e)}")
+
+
+@app.delete("/api/admin/data-files/{filename}")
+async def delete_data_file(filename: str, authorized: bool = Depends(verify_admin_password)):
+    """Delete a specific data file."""
+    # Prevent path traversal
+    if '..' in filename or '/' in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    # Prevent deletion of critical files
+    protected_files = {'topics_tasks.json', 'consent.json', 'llm_config.json', 'personas.json'}
+    if filename in protected_files:
+        raise HTTPException(status_code=403, detail="Cannot delete protected system files")
+
+    filepath = DATA_DIR / filename
+    if not filepath.exists() or not filepath.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    try:
+        filepath.unlink()
+        return {"status": "deleted", "name": filename}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete file: {str(e)}")
+
+
+# ==================== Conversations API ====================
+
+@app.get("/api/admin/conversations")
+async def list_conversations(authorized: bool = Depends(verify_admin_password)):
+    """List all conversation files."""
+    conversations = []
+    if CONVERSATIONS_DIR.exists():
+        for f in CONVERSATIONS_DIR.iterdir():
+            if f.is_file() and f.suffix == '.json':
+                stat = f.stat()
+                # Try to read basic info
+                try:
+                    with open(f, 'r') as file:
+                        data = json.load(file)
+                        conversations.append({
+                            "session_id": f.stem,
+                            "filename": f.name,
+                            "size": stat.st_size,
+                            "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                            "topic": data.get("topic", "Unknown"),
+                            "message_count": len(data.get("messages", [])),
+                            "started_at": data.get("started_at"),
+                            "ended_at": data.get("ended_at")
+                        })
+                except:
+                    conversations.append({
+                        "session_id": f.stem,
+                        "filename": f.name,
+                        "size": stat.st_size,
+                        "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                        "topic": "Unknown",
+                        "message_count": 0,
+                        "started_at": None,
+                        "ended_at": None
+                    })
+    return sorted(conversations, key=lambda x: x["modified"], reverse=True)
+
+
+@app.get("/api/admin/conversations/{session_id}")
+async def get_conversation(session_id: str, authorized: bool = Depends(verify_admin_password)):
+    """Get content of a specific conversation."""
+    # Prevent path traversal
+    if '..' in session_id or '/' in session_id:
+        raise HTTPException(status_code=400, detail="Invalid session ID")
+
+    filepath = CONVERSATIONS_DIR / f"{session_id}.json"
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    try:
+        with open(filepath, 'r') as f:
+            content = json.load(f)
+        return content
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read conversation: {str(e)}")
+
+
+@app.get("/api/admin/conversations/{session_id}/download")
+async def download_conversation(session_id: str, authorized: bool = Depends(verify_admin_password)):
+    """Download a specific conversation file."""
+    # Prevent path traversal
+    if '..' in session_id or '/' in session_id:
+        raise HTTPException(status_code=400, detail="Invalid session ID")
+
+    filepath = CONVERSATIONS_DIR / f"{session_id}.json"
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    return FileResponse(
+        path=str(filepath),
+        filename=f"{session_id}.json",
+        media_type='application/json'
+    )
+
+
+@app.delete("/api/admin/conversations/{session_id}")
+async def delete_conversation(session_id: str, authorized: bool = Depends(verify_admin_password)):
+    """Delete a specific conversation."""
+    # Prevent path traversal
+    if '..' in session_id or '/' in session_id:
+        raise HTTPException(status_code=400, detail="Invalid session ID")
+
+    filepath = CONVERSATIONS_DIR / f"{session_id}.json"
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    try:
+        filepath.unlink()
+        return {"status": "deleted", "session_id": session_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete conversation: {str(e)}")
+
+
+@app.get("/api/admin/conversations-download-all")
+async def download_all_conversations(authorized: bool = Depends(verify_admin_password)):
+    """Download all conversations as a ZIP file."""
+    if not CONVERSATIONS_DIR.exists():
+        raise HTTPException(status_code=404, detail="No conversations directory found")
+
+    # Create ZIP in memory
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for f in CONVERSATIONS_DIR.iterdir():
+            if f.is_file() and f.suffix == '.json':
+                zip_file.write(f, f.name)
+
+    zip_buffer.seek(0)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    return StreamingResponse(
+        zip_buffer,
+        media_type='application/zip',
+        headers={
+            'Content-Disposition': f'attachment; filename="conversations_{timestamp}.zip"'
+        }
+    )

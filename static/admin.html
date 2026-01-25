@@ -7,39 +7,94 @@
     <link rel="stylesheet" href="/static/css/admin.css">
 </head>
 <body>
-    <div class="admin-container">
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-box">
+            <h1>Chat Arena Admin</h1>
+            <p>Enter the admin password to continue</p>
+            <form id="login-form">
+                <input type="password" id="password-input" placeholder="Password" autocomplete="off" autofocus>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <div id="login-error" class="login-error hidden">Invalid password</div>
+        </div>
+    </div>
+
+    <!-- Main Admin Panel (hidden until authenticated) -->
+    <div id="admin-panel" class="admin-container hidden">
         <!-- Header -->
         <header class="admin-header">
             <h1>Chat Arena Admin</h1>
-            <a href="/" class="btn btn-secondary">Back to Chat</a>
+            <div class="header-actions">
+                <a href="/" class="btn btn-secondary">Back to Chat</a>
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
         </header>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="data-files">Data Files</button>
+            <button class="tab" data-tab="conversations">Conversations</button>
+            <button class="tab" data-tab="topics-tasks">Topics & Tasks</button>
+            <button class="tab" data-tab="consent">Consent Form</button>
+        </div>
 
         <!-- Main Content -->
         <main class="admin-main">
-            <!-- Topics Section -->
-            <section class="admin-section">
+            <!-- Data Files Tab -->
+            <section id="data-files-tab" class="tab-content active">
                 <div class="section-header">
-                    <h2>Conversation Topics</h2>
-                    <button id="add-topic-btn" class="btn btn-primary btn-small">+ Add Topic</button>
+                    <h2>Data Files</h2>
+                    <div class="section-actions">
+                        <label class="btn btn-primary btn-small upload-btn">
+                            Upload File
+                            <input type="file" id="upload-file-input" accept=".json" hidden>
+                        </label>
+                    </div>
                 </div>
-                <div id="topics-list" class="items-list">
-                    <!-- Topics will be loaded here -->
+                <div id="data-files-list" class="items-list">
+                    <div class="loading">Loading...</div>
                 </div>
             </section>
 
-            <!-- Tasks Section -->
-            <section class="admin-section">
+            <!-- Conversations Tab -->
+            <section id="conversations-tab" class="tab-content hidden">
                 <div class="section-header">
-                    <h2>Hidden Tasks</h2>
-                    <button id="add-task-btn" class="btn btn-primary btn-small">+ Add Task</button>
+                    <h2>Conversations</h2>
+                    <div class="section-actions">
+                        <button id="download-all-conversations" class="btn btn-primary btn-small">Download All (ZIP)</button>
+                    </div>
                 </div>
-                <div id="tasks-list" class="items-list">
-                    <!-- Tasks will be loaded here -->
+                <div id="conversations-list" class="items-list">
+                    <div class="loading">Loading...</div>
                 </div>
             </section>
 
-            <!-- Consent Section -->
-            <section class="admin-section">
+            <!-- Topics & Tasks Tab -->
+            <section id="topics-tasks-tab" class="tab-content hidden">
+                <div class="admin-section">
+                    <div class="section-header">
+                        <h2>Conversation Topics</h2>
+                        <button id="add-topic-btn" class="btn btn-primary btn-small">+ Add Topic</button>
+                    </div>
+                    <div id="topics-list" class="items-list">
+                        <div class="loading">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <div class="section-header">
+                        <h2>Hidden Tasks</h2>
+                        <button id="add-task-btn" class="btn btn-primary btn-small">+ Add Task</button>
+                    </div>
+                    <div id="tasks-list" class="items-list">
+                        <div class="loading">Loading...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Consent Tab -->
+            <section id="consent-tab" class="tab-content hidden">
                 <div class="section-header">
                     <h2>Consent Form</h2>
                 </div>
@@ -59,7 +114,6 @@
                     <div class="form-group">
                         <label>Checkboxes</label>
                         <div id="consent-checkboxes-list" class="checkboxes-list">
-                            <!-- Checkboxes will be loaded here -->
                         </div>
                         <button id="add-checkbox-btn" class="btn btn-secondary btn-small">+ Add Checkbox</button>
                     </div>
@@ -71,7 +125,7 @@
             </section>
         </main>
 
-        <!-- Edit Modal -->
+        <!-- Edit Modal for Topics/Tasks -->
         <div id="edit-modal" class="modal hidden">
             <div class="modal-content">
                 <h3 id="edit-modal-title">Edit Item</h3>
@@ -82,6 +136,34 @@
                 <div class="modal-actions">
                     <button id="edit-cancel-btn" class="btn btn-secondary">Cancel</button>
                     <button id="edit-save-btn" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Editor Modal -->
+        <div id="file-editor-modal" class="modal hidden">
+            <div class="modal-content modal-large">
+                <h3 id="file-editor-title">Edit File</h3>
+                <div class="form-group">
+                    <textarea id="file-editor-content" class="form-textarea code-editor" rows="20"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button id="file-editor-cancel" class="btn btn-secondary">Cancel</button>
+                    <button id="file-editor-format" class="btn btn-secondary">Format JSON</button>
+                    <button id="file-editor-save" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversation Viewer Modal -->
+        <div id="conversation-modal" class="modal hidden">
+            <div class="modal-content modal-large">
+                <h3 id="conversation-title">Conversation</h3>
+                <div id="conversation-meta" class="conversation-meta"></div>
+                <div id="conversation-messages" class="conversation-messages"></div>
+                <div class="modal-actions">
+                    <button id="conversation-close" class="btn btn-secondary">Close</button>
+                    <button id="conversation-download" class="btn btn-primary">Download</button>
                 </div>
             </div>
         </div>

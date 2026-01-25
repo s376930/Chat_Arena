@@ -30,3 +30,9 @@ XAI_API_KEY = os.getenv("XAI_API_KEY", "")
 
 # Minimum characters required in "think" field before "speech" is enabled
 MIN_THINK_CHARS = 10
+
+# Inactivity timeout in seconds (10 minutes)
+INACTIVITY_TIMEOUT_SECONDS = int(os.getenv("INACTIVITY_TIMEOUT_SECONDS", "600"))
+
+# Admin password (hashed for security)
+ADMIN_PASSWORD = "@Azimute82118791!"

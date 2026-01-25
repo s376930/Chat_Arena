@@ -13,6 +13,7 @@ class MessageType(str, Enum):
     PAIRED = "paired"
     PARTNER_MESSAGE = "partner_message"
     PARTNER_LEFT = "partner_left"
+    INACTIVITY_KICK = "inactivity_kick"
     ERROR = "error"
 
 
@@ -121,6 +122,7 @@ class UserSession(BaseModel):
     session_id: Optional[str] = None
     task: Optional[str] = None
     is_ai_partner: bool = False  # True if partner is an AI
+    last_activity: Optional[datetime] = None  # Track last activity for inactivity timeout
 
 
 # AI session tracking

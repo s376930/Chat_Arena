@@ -2,7 +2,7 @@ from fastapi import WebSocket
 from typing import Optional
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from .models import UserSession, AISession
 
@@ -95,6 +95,24 @@ class WebSocketManager:
             task=None,
             is_ai_partner=False
         )
+
+    def update_activity(self, user_id: str) -> None:
+        """Update a user's last activity timestamp."""
+        if user_id in self.sessions:
+            self.sessions[user_id].last_activity = datetime.now()
+
+    def get_inactive_users(self, timeout_seconds: int) -> list[str]:
+        """Get list of user IDs that have been inactive for longer than timeout."""
+        inactive_users = []
+        cutoff_time = datetime.now() - timedelta(seconds=timeout_seconds)
+
+        for user_id, session in self.sessions.items():
+            # Only check users who are paired (in an active conversation)
+            if session.paired and session.last_activity:
+                if session.last_activity < cutoff_time:
+                    inactive_users.append(user_id)
+
+        return inactive_users
 
     # AI session management methods
 

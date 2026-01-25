@@ -29,6 +29,9 @@ const App = {
         // Setup reassign button handler
         UI.elements.reassignBtn.addEventListener('click', () => this.handleReassign());
 
+        // Setup return from inactivity button handler
+        UI.elements.returnBtn.addEventListener('click', () => this.handleReturnFromInactivity());
+
         // Setup WebSocket event handlers
         this.setupWebSocketHandlers();
     },
@@ -84,6 +87,12 @@ const App = {
             console.error('Server error:', data.message);
             UI.showError(data.message);
         });
+
+        wsClient.on('inactivityKick', () => {
+            console.log('Kicked due to inactivity');
+            this.sessionId = null;
+            UI.showInactivityScreen();
+        });
     },
 
     /**
@@ -134,6 +143,17 @@ const App = {
             wsClient.requestReassign();
             this.sessionId = null;
         }
+    },
+
+    /**
+     * Handle return from inactivity screen
+     */
+    handleReturnFromInactivity() {
+        // Hide inactivity screen
+        UI.hideInactivityScreen();
+
+        // Rejoin the queue
+        wsClient.join();
     }
 };
 

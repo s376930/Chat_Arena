@@ -91,6 +91,9 @@ class WebSocketClient {
             case 'partner_left':
                 this.trigger('partnerLeft', data);
                 break;
+            case 'inactivity_kick':
+                this.trigger('inactivityKick', data);
+                break;
             case 'error':
                 this.trigger('serverError', data);
                 break;
