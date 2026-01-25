@@ -2,6 +2,7 @@
 
 import asyncio
 import random
+import re
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -14,6 +15,53 @@ from .context import ContextBuilder
 from .sentiment import SentimentAnalyzer, SentimentResult
 
 logger = logging.getLogger(__name__)
+
+
+def sanitize_speech(text: str) -> str:
+    """
+    Remove LLM artifacts from speech text while preserving the actual message.
+
+    Removes:
+    - XML/HTML-like tags: <speech>, </speech>, <tag>, etc.
+    - Square bracket content: [stage directions], [actions], etc.
+    - Parenthetical stage directions: (sighs), (laughing), etc.
+
+    Args:
+        text: Raw speech text from LLM
+
+    Returns:
+        Cleaned speech text
+    """
+    if not text:
+        return text
+
+    # Remove XML/HTML-like tags (but keep content between opening/closing tags)
+    # Matches <word>, </word>, <word/>, <word attr="value">, etc.
+    text = re.sub(r'<[^>]+>', '', text)
+
+    # Remove square bracket content entirely (stage directions, actions)
+    # Matches [anything here], [Steepling hands], etc.
+    text = re.sub(r'\[[^\]]*\]', '', text)
+
+    # Remove parenthetical stage directions (action words at start or standalone)
+    # Common patterns: (sighs), (laughing nervously), (pauses), etc.
+    # Only remove if it looks like a stage direction, not normal parenthetical text
+    stage_direction_pattern = r'\(\s*(?:[A-Z][a-z]*(?:ing|s|ed)?(?:\s+\w+)*)\s*\)'
+    text = re.sub(stage_direction_pattern, '', text)
+
+    # Also remove parentheticals that are clearly actions (lowercase action verbs)
+    action_verbs = r'\(\s*(?:sighs?|laughs?|laughing|chuckles?|chuckling|smiles?|smiling|'
+    action_verbs += r'grins?|grinning|nods?|nodding|shrugs?|shrugging|pauses?|pausing|'
+    action_verbs += r'thinks?|thinking|frowns?|frowning|winks?|winking|gestures?|gesturing|'
+    action_verbs += r'leans?\s+\w+|clears?\s+throat|rolls?\s+eyes?|raises?\s+eyebrow)'
+    action_verbs += r'(?:\s+\w+)*\s*\)'
+    text = re.sub(action_verbs, '', text, flags=re.IGNORECASE)
+
+    # Clean up extra whitespace
+    text = re.sub(r'\s+', ' ', text)
+    text = text.strip()
+
+    return text
 
 
 @dataclass
@@ -142,8 +190,12 @@ class AIParticipant:
         # Generate and send response
         await self._generate_and_send_response()
 
-    async def _generate_and_send_response(self, is_idle_prompt: bool = False):
-        """Generate a response and send it via callback."""
+    async def _generate_and_send_response(self, is_idle_prompt: bool = False) -> bool:
+        """Generate a response and send it via callback.
+
+        Returns:
+            True if message was successfully generated and sent, False otherwise.
+        """
         # Calculate idle time
         idle_seconds = 0
         if self.state.last_partner_message_time:
@@ -167,18 +219,28 @@ class AIParticipant:
         response = await self._generate_with_retry(messages, system_prompt, context)
         if not response:
             logger.error(f"AI {self.ai_id} failed to generate response")
-            return
+            return False
+
+        # Sanitize speech to remove LLM artifacts
+        clean_speech = sanitize_speech(response.speech)
+
+        # Check if speech is empty after sanitization
+        if not clean_speech:
+            logger.warning(f"AI {self.ai_id} speech was empty after sanitization")
+            return False
 
         # Simulate typing delay
-        await self._simulate_typing_delay(response.speech)
+        await self._simulate_typing_delay(clean_speech)
 
-        # Add to memory
-        self.memory.add_ai_message(response.think, response.speech)
+        # Add to memory (store original for context, but send sanitized)
+        self.memory.add_ai_message(response.think, clean_speech)
         self.state.last_ai_message_time = datetime.now()
 
-        # Send via callback
+        # Send via callback (sanitized speech)
         if self.on_message:
-            await self.on_message(self.ai_id, response.think, response.speech)
+            await self.on_message(self.ai_id, response.think, clean_speech)
+
+        return True
 
     async def _generate_with_retry(
         self,
@@ -263,9 +325,10 @@ class AIParticipant:
                             f"AI {self.ai_id} partner idle for {idle_seconds}s, "
                             f"sending re-engagement"
                         )
-                        await self._generate_and_send_response(is_idle_prompt=True)
-                        # Reset the timer by updating last partner message time
-                        self.state.last_partner_message_time = datetime.now()
+                        success = await self._generate_and_send_response(is_idle_prompt=True)
+                        # Only reset the timer if message was successfully sent
+                        if success:
+                            self.state.last_partner_message_time = datetime.now()
 
         except asyncio.CancelledError:
             pass

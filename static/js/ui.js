@@ -214,6 +214,8 @@ const UI = {
         this.elements.topicBanner.classList.remove('hidden');
 
         this.elements.topicText.textContent = topic;
+        this.elements.topicBanner.setAttribute('data-full-topic', topic);
+        this.elements.topicBanner.setAttribute('title', topic);
         this.elements.taskText.textContent = task;
 
         this.elements.reassignBtn.disabled = false;
