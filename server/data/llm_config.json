@@ -8,8 +8,8 @@
       "api_key_env": "ANTHROPIC_API_KEY"
     },
     "openai": {
-      "enabled": false,
-      "model": "gpt-4o",
+      "enabled": true,
+      "model": "gpt-5-nano",
       "api_key_env": "OPENAI_API_KEY"
     },
     "grok": {
