@@ -159,6 +159,9 @@ const Admin = {
         // Download all conversations
         document.getElementById('download-all-conversations').addEventListener('click', () => this.downloadAllConversations());
 
+        // Delete all conversations
+        document.getElementById('delete-all-conversations').addEventListener('click', () => this.deleteAllConversations());
+
         // File upload
         document.getElementById('upload-file-input').addEventListener('change', (e) => this.handleFileUpload(e));
 
@@ -619,6 +622,34 @@ const Admin = {
         } catch (e) {
             console.error('Failed to download conversations:', e);
             this.showToast('Failed to download conversations', 'error');
+        }
+    },
+
+    /**
+     * Delete all conversations
+     */
+    async deleteAllConversations() {
+        if (!confirm('Are you sure you want to delete ALL conversations? This cannot be undone!')) return;
+
+        // Double confirmation for destructive action
+        if (!confirm('This will permanently delete all conversation data. Are you absolutely sure?')) return;
+
+        try {
+            const response = await this.apiRequest('/api/admin/conversations-delete-all', {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to delete');
+            }
+
+            const result = await response.json();
+            this.showToast(`Deleted ${result.deleted_count} conversations`, 'success');
+            this.loadConversations();
+        } catch (e) {
+            console.error('Failed to delete conversations:', e);
+            this.showToast(e.message || 'Failed to delete conversations', 'error');
         }
     },
 

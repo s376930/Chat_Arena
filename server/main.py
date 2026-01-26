@@ -1076,3 +1076,30 @@ async def download_all_conversations(authorized: bool = Depends(verify_admin_pas
             'Content-Disposition': f'attachment; filename="conversations_{timestamp}.zip"'
         }
     )
+
+
+@app.delete("/api/admin/conversations-delete-all")
+async def delete_all_conversations(authorized: bool = Depends(verify_admin_password)):
+    """Delete all conversations."""
+    if not CONVERSATIONS_DIR.exists():
+        return {"status": "success", "deleted_count": 0}
+
+    deleted_count = 0
+    errors = []
+
+    for f in CONVERSATIONS_DIR.iterdir():
+        if f.is_file() and f.suffix == '.json':
+            try:
+                f.unlink()
+                deleted_count += 1
+            except Exception as e:
+                errors.append(f"{f.name}: {str(e)}")
+
+    if errors:
+        return {
+            "status": "partial",
+            "deleted_count": deleted_count,
+            "errors": errors
+        }
+
+    return {"status": "success", "deleted_count": deleted_count}
