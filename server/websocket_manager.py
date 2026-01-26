@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import WebSocket
 from typing import Optional
 import json
@@ -17,6 +18,8 @@ class WebSocketManager:
         self.sessions: dict[str, UserSession] = {}
         # Map ai_id -> AISession (for tracking AI participants)
         self.ai_sessions: dict[str, AISession] = {}
+        # Lock for thread-safe session operations
+        self._session_lock = asyncio.Lock()
 
     def generate_user_id(self) -> str:
         """Generate a unique user ID."""
@@ -71,8 +74,19 @@ class WebSocketManager:
     async def send_to_partner(self, user_id: str, data: dict) -> bool:
         """Send JSON data to a user's partner. Returns True if successful."""
         session = self.get_session(user_id)
-        if session and session.partner_id:
+        if not session or not session.partner_id:
+            return False
+
+        # Verify partner still considers us their partner (prevents cross-talk)
+        partner_session = self.get_session(session.partner_id)
+        if partner_session and partner_session.partner_id == user_id:
             return await self.send_json(session.partner_id, data)
+
+        # For AI partners, check AI sessions instead
+        ai_session = self.get_ai_session(session.partner_id)
+        if ai_session and ai_session.partner_id == user_id:
+            return await self.send_json(session.partner_id, data)
+
         return False
 
     def is_paired(self, user_id: str) -> bool:
@@ -95,6 +109,82 @@ class WebSocketManager:
             task=None,
             is_ai_partner=False
         )
+
+    async def pair_users_atomic(
+        self,
+        user_id: str,
+        partner_id: str,
+        session_id: str,
+        user_task: str,
+        partner_task: str
+    ) -> bool:
+        """
+        Atomically pair two users. Both sessions are updated together under a lock.
+        Returns True if successful, False if either user is no longer available.
+        """
+        async with self._session_lock:
+            # Verify both users still exist and are not already paired
+            user_session = self.sessions.get(user_id)
+            partner_session = self.sessions.get(partner_id)
+
+            if not user_session or not partner_session:
+                return False
+
+            if user_session.paired or partner_session.paired:
+                return False
+
+            # Update both sessions atomically
+            user_session.paired = True
+            user_session.partner_id = partner_id
+            user_session.session_id = session_id
+            user_session.task = user_task
+            user_session.is_ai_partner = False
+            user_session.last_activity = datetime.now()
+
+            partner_session.paired = True
+            partner_session.partner_id = user_id
+            partner_session.session_id = session_id
+            partner_session.task = partner_task
+            partner_session.is_ai_partner = False
+            partner_session.last_activity = datetime.now()
+
+            return True
+
+    async def clear_pairing_atomic(self, user_id: str) -> Optional[str]:
+        """
+        Atomically clear a user's pairing status.
+        Returns the partner_id if user was paired, None otherwise.
+        """
+        async with self._session_lock:
+            session = self.sessions.get(user_id)
+            if not session:
+                return None
+
+            partner_id = session.partner_id
+
+            session.paired = False
+            session.partner_id = None
+            session.session_id = None
+            session.task = None
+            session.is_ai_partner = False
+
+            return partner_id
+
+    async def verify_pairing(self, user_id: str, partner_id: str) -> bool:
+        """Verify that two users are mutually paired."""
+        async with self._session_lock:
+            user_session = self.sessions.get(user_id)
+            partner_session = self.sessions.get(partner_id)
+
+            if not user_session or not partner_session:
+                return False
+
+            return (
+                user_session.paired and
+                partner_session.paired and
+                user_session.partner_id == partner_id and
+                partner_session.partner_id == user_id
+            )
 
     def update_activity(self, user_id: str) -> None:
         """Update a user's last activity timestamp."""

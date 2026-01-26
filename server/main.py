@@ -105,8 +105,8 @@ async def pair_with_ai(user_id: str) -> bool:
 
         ai_id = ai_participant.ai_id
 
-        # Remove user from queue
-        pairing_service.remove_from_queue(user_id)
+        # Remove user from queue (atomic)
+        await pairing_service.remove_from_queue_atomic(user_id)
 
         # Update user session
         manager.update_session(
@@ -169,8 +169,9 @@ async def delayed_pairing(user_id: str, delay_seconds: int):
     if not session or session.paired:
         return
 
-    # Check if user is still in queue
-    if pairing_service.get_queue_position(user_id) == 0:
+    # Check if user is still in queue (atomic)
+    position = await pairing_service.get_queue_position_atomic(user_id)
+    if position == 0:
         return
 
     # Try normal pairing first
@@ -180,7 +181,7 @@ async def delayed_pairing(user_id: str, delay_seconds: int):
     session = manager.get_session(user_id)
     if session and not session.paired:
         if ai_manager and ai_manager.is_available and ai_manager.force_ai_on_odd_users:
-            if pairing_service.has_odd_user_waiting():
+            if await pairing_service.has_odd_user_waiting_atomic():
                 await pair_with_ai(user_id)
 
 
@@ -220,37 +221,40 @@ async def handle_inactivity_kick(user_id: str):
                 await ai_manager.remove_ai_participant(partner_id)
                 manager.remove_ai_session(partner_id)
             else:
-                # Notify human partner
-                await manager.send_json(partner_id, {"type": "partner_left"})
-                manager.clear_pairing(partner_id)
+                # Clear partner's pairing atomically first
+                cleared_partner = await manager.clear_pairing_atomic(partner_id)
 
-                # Add delay for partner if enabled
-                if ai_manager and ai_manager.pairing_delay_enabled:
-                    pairing_service.add_delay(partner_id)
+                if cleared_partner is not None:
+                    # Notify human partner
+                    await manager.send_json(partner_id, {"type": "partner_left"})
 
-                # Put partner back in queue
-                position = pairing_service.add_to_queue(partner_id)
-                await manager.send_json(partner_id, {
-                    "type": "waiting",
-                    "position": position
-                })
+                    # Add delay for partner if enabled
+                    if ai_manager and ai_manager.pairing_delay_enabled:
+                        pairing_service.add_delay(partner_id)
 
-                # Schedule delayed pairing for partner
-                if ai_manager and ai_manager.pairing_delay_enabled:
-                    asyncio.create_task(
-                        delayed_pairing(partner_id, ai_manager.reassign_delay_seconds)
-                    )
-                else:
-                    await try_pairing(partner_id)
+                    # Put partner back in queue (atomic)
+                    position = await pairing_service.add_to_queue_atomic(partner_id)
+                    await manager.send_json(partner_id, {
+                        "type": "waiting",
+                        "position": position
+                    })
+
+                    # Schedule delayed pairing for partner
+                    if ai_manager and ai_manager.pairing_delay_enabled:
+                        asyncio.create_task(
+                            delayed_pairing(partner_id, ai_manager.reassign_delay_seconds)
+                        )
+                    else:
+                        await try_pairing(partner_id)
 
         # End conversation if exists
         if session_id:
             await storage_service.end_conversation(session_id)
 
     # Remove user from queue and clear their session (but don't fully disconnect)
-    pairing_service.remove_from_queue(user_id)
+    await pairing_service.remove_from_queue_atomic(user_id)
     pairing_service.remove_delay(user_id)
-    manager.clear_pairing(user_id)
+    await manager.clear_pairing_atomic(user_id)
     # Reset their consent status so they need to rejoin
     manager.update_session(user_id, consented=False, last_activity=None)
 
@@ -368,8 +372,8 @@ async def handle_join(user_id: str, data: dict):
     manager.update_session(user_id, consented=True)
     manager.update_activity(user_id)  # Track activity
 
-    # Add to queue
-    position = pairing_service.add_to_queue(user_id)
+    # Add to queue (atomic)
+    position = await pairing_service.add_to_queue_atomic(user_id)
 
     # Send waiting status
     await manager.send_json(user_id, {
@@ -385,13 +389,14 @@ async def try_pairing(user_id: str):
     """Attempt to pair a user with someone in the queue."""
     global ai_manager
 
-    partner_id = pairing_service.try_pair(user_id)
+    # Use atomic version to prevent race conditions
+    partner_id = await pairing_service.try_pair_atomic(user_id)
 
     if not partner_id:
         # Check if we should pair with AI (using is_available for graceful degradation)
         if ai_manager and ai_manager.is_available and ai_manager.force_ai_on_odd_users:
-            if pairing_service.has_odd_user_waiting():
-                odd_user = pairing_service.get_odd_user()
+            if await pairing_service.has_odd_user_waiting_atomic():
+                odd_user = await pairing_service.get_odd_user_atomic()
                 if odd_user:
                     await pair_with_ai(odd_user)
         return
@@ -402,8 +407,8 @@ async def try_pairing(user_id: str):
 
     if not topic or len(tasks) < 2:
         # Put both back in queue if no topics/tasks available
-        pairing_service.add_to_queue(user_id)
-        pairing_service.add_to_queue(partner_id)
+        await pairing_service.add_to_queue_atomic(user_id)
+        await pairing_service.add_to_queue_atomic(partner_id)
         await manager.send_json(user_id, {
             "type": "error",
             "message": "No topics or tasks available. Please try again later."
@@ -417,13 +422,21 @@ async def try_pairing(user_id: str):
     # Generate session ID
     session_id = pairing_service.generate_session_id()
 
-    # Update both sessions
-    manager.update_session(user_id, paired=True, partner_id=partner_id, session_id=session_id, task=tasks[0].text)
-    manager.update_session(partner_id, paired=True, partner_id=user_id, session_id=session_id, task=tasks[1].text)
+    # Atomically pair both users - this prevents race conditions
+    paired = await manager.pair_users_atomic(
+        user_id=user_id,
+        partner_id=partner_id,
+        session_id=session_id,
+        user_task=tasks[0].text,
+        partner_task=tasks[1].text
+    )
 
-    # Set initial activity timestamp for both users
-    manager.update_activity(user_id)
-    manager.update_activity(partner_id)
+    if not paired:
+        # Pairing failed (one user disconnected or already paired)
+        # Put the user who initiated back in queue
+        await pairing_service.add_to_queue_atomic(user_id)
+        logger.warning(f"Atomic pairing failed for {user_id} and {partner_id}")
+        return
 
     # Create conversation in storage
     storage_service.create_conversation(
@@ -463,6 +476,27 @@ async def handle_chat_message(user_id: str, data: dict):
             "message": "You are not in an active chat session"
         })
         return
+
+    # Verify partner still exists and we are mutually paired
+    partner_id = session.partner_id
+    if not partner_id:
+        await manager.send_json(user_id, {
+            "type": "error",
+            "message": "Partner connection lost"
+        })
+        return
+
+    # For non-AI partners, verify mutual pairing to prevent cross-talk
+    if not session.is_ai_partner:
+        partner_session = manager.get_session(partner_id)
+        if not partner_session or partner_session.partner_id != user_id:
+            await manager.send_json(user_id, {
+                "type": "error",
+                "message": "Partner connection lost"
+            })
+            # Clear the broken pairing
+            await manager.clear_pairing_atomic(user_id)
+            return
 
     # Update activity timestamp
     manager.update_activity(user_id)
@@ -507,15 +541,18 @@ async def handle_chat_message(user_id: str, data: dict):
     if session.is_ai_partner and ai_manager:
         # Forward to AI for response (non-blocking - runs in background)
         asyncio.create_task(
-            ai_manager.forward_message_to_ai(session.partner_id, speech)
+            ai_manager.forward_message_to_ai(partner_id, speech)
         )
     else:
         # Send to human partner (only the speech part)
-        await manager.send_to_partner(user_id, {
+        # send_to_partner already has partner verification built in
+        sent = await manager.send_to_partner(user_id, {
             "type": "partner_message",
             "content": speech,
             "timestamp": timestamp
         })
+        if not sent:
+            logger.warning(f"Failed to send message from {user_id} to partner {partner_id}")
 
 
 async def handle_reassign(user_id: str):
@@ -535,42 +572,46 @@ async def handle_reassign(user_id: str):
             await ai_manager.remove_ai_participant(partner_id)
             manager.remove_ai_session(partner_id)
         elif partner_id:
-            # Notify human partner
-            await manager.send_json(partner_id, {"type": "partner_left"})
-            manager.clear_pairing(partner_id)
+            # Clear partner's pairing atomically first to prevent race conditions
+            cleared_partner = await manager.clear_pairing_atomic(partner_id)
 
-            # Add delay for partner if enabled
-            if ai_manager and ai_manager.pairing_delay_enabled:
-                pairing_service.add_delay(partner_id)
+            # Only proceed if partner still exists
+            if cleared_partner is not None:
+                # Notify human partner
+                await manager.send_json(partner_id, {"type": "partner_left"})
 
-            # Put partner back in queue
-            position = pairing_service.add_to_queue(partner_id)
-            await manager.send_json(partner_id, {
-                "type": "waiting",
-                "position": position
-            })
+                # Add delay for partner if enabled
+                if ai_manager and ai_manager.pairing_delay_enabled:
+                    pairing_service.add_delay(partner_id)
 
-            # Schedule delayed pairing for partner
-            if ai_manager and ai_manager.pairing_delay_enabled:
-                asyncio.create_task(
-                    delayed_pairing(partner_id, ai_manager.reassign_delay_seconds)
-                )
-            else:
-                await try_pairing(partner_id)
+                # Put partner back in queue (atomic)
+                position = await pairing_service.add_to_queue_atomic(partner_id)
+                await manager.send_json(partner_id, {
+                    "type": "waiting",
+                    "position": position
+                })
+
+                # Schedule delayed pairing for partner
+                if ai_manager and ai_manager.pairing_delay_enabled:
+                    asyncio.create_task(
+                        delayed_pairing(partner_id, ai_manager.reassign_delay_seconds)
+                    )
+                else:
+                    await try_pairing(partner_id)
 
         # End the conversation
         if session_id:
             await storage_service.end_conversation(session_id)
 
-    # Clear user's pairing
-    manager.clear_pairing(user_id)
+    # Clear user's pairing atomically
+    await manager.clear_pairing_atomic(user_id)
 
     # Add delay for user if enabled
     if ai_manager and ai_manager.pairing_delay_enabled:
         pairing_service.add_delay(user_id)
 
-    # Add to queue
-    position = pairing_service.add_to_queue(user_id)
+    # Add to queue (atomic)
+    position = await pairing_service.add_to_queue_atomic(user_id)
     await manager.send_json(user_id, {
         "type": "waiting",
         "position": position
@@ -603,35 +644,39 @@ async def handle_disconnect(user_id: str):
                 await ai_manager.remove_ai_participant(partner_id)
                 manager.remove_ai_session(partner_id)
             else:
-                # Notify human partner
-                await manager.send_json(partner_id, {"type": "partner_left"})
-                manager.clear_pairing(partner_id)
+                # Clear partner's pairing atomically first to prevent race conditions
+                cleared_partner = await manager.clear_pairing_atomic(partner_id)
 
-                # Add delay for partner if enabled
-                if ai_manager and ai_manager.pairing_delay_enabled:
-                    pairing_service.add_delay(partner_id)
+                # Only proceed if partner still exists and was successfully cleared
+                if cleared_partner is not None:
+                    # Notify human partner
+                    await manager.send_json(partner_id, {"type": "partner_left"})
 
-                # Put partner back in queue
-                position = pairing_service.add_to_queue(partner_id)
-                await manager.send_json(partner_id, {
-                    "type": "waiting",
-                    "position": position
-                })
+                    # Add delay for partner if enabled
+                    if ai_manager and ai_manager.pairing_delay_enabled:
+                        pairing_service.add_delay(partner_id)
 
-                # Schedule delayed pairing for partner
-                if ai_manager and ai_manager.pairing_delay_enabled:
-                    asyncio.create_task(
-                        delayed_pairing(partner_id, ai_manager.reassign_delay_seconds)
-                    )
-                else:
-                    await try_pairing(partner_id)
+                    # Put partner back in queue (atomic)
+                    position = await pairing_service.add_to_queue_atomic(partner_id)
+                    await manager.send_json(partner_id, {
+                        "type": "waiting",
+                        "position": position
+                    })
+
+                    # Schedule delayed pairing for partner
+                    if ai_manager and ai_manager.pairing_delay_enabled:
+                        asyncio.create_task(
+                            delayed_pairing(partner_id, ai_manager.reassign_delay_seconds)
+                        )
+                    else:
+                        await try_pairing(partner_id)
 
         # End conversation if exists
         if session_id:
             await storage_service.end_conversation(session_id)
 
-    # Remove from queue and disconnect
-    pairing_service.remove_from_queue(user_id)
+    # Remove from queue and disconnect (atomic)
+    await pairing_service.remove_from_queue_atomic(user_id)
     pairing_service.remove_delay(user_id)  # Clean up any pending delay
     manager.disconnect(user_id)
 
