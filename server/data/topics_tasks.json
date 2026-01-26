@@ -2,33 +2,229 @@
   "topics": [
     {
       "id": 1,
-      "text": "Ketchup is not a smoothie because \u2018smoothie\u2019 implies a drinkable beverage intended for consumption as a drink, not a condiment, so function overrides ingredients"
+      "text": "AI progress should be paused or deliberately slowed because current frontier systems are being deployed faster than we can audit their failure modes"
+    },
+    {
+      "id": 2,
+      "text": "AI progress should not be paused because the same tools that create risk also create safety capacity (evidence: AI-assisted cybersecurity, medical imaging, and scientific discovery gains)."
+    },
+    {
+      "id": 3,
+      "text": "AI should not be heavily regulated by governments because rigid rules tend to entrench incumbents and push development into less accountable jurisdictions (evidence: compliance burdens usually scale poorly for startups)."
+    },
+    {
+      "id": 4,
+      "text": "AI should be heavily regulated by governments because without oversight, profit motives will lead to cutting corners on safety and ethical considerations (evidence: past tech industry abuses and externalities)."
+    },
+    {
+      "id": 5,
+      "text": "AI systems should be open-source to allow for greater transparency and collective oversight (evidence: open-source software has historically led to more secure and robust systems)."
+    },
+    {
+      "id": 6,
+      "text": "AI systems should be proprietary to ensure that companies can recoup their investments and maintain competitive advantages (evidence: proprietary models often drive innovation through funding and resources)."
+    },
+    {
+      "id": 7,
+      "text": "AI-generated public content should be legally labeled because provenance reduces fraud, manipulation, and misinformation (evidence: deepfakes and synthetic spam already exploit ambiguity)."
+    },
+    {
+      "id": 8,
+      "text": "AI-generated content should not be legally mandated to carry labels because it creates chilling effects and incentivizes censorship or selective enforcement (evidence: moderation and classification errors are common at scale)."
     }
   ],
   "tasks": [
     {
       "id": 1,
-      "text": "Try to change your partner's opinion"
+      "text": "ATTACK POSITION: Try to change your partner's opinion regardless of your own beliefs"
     },
     {
       "id": 2,
-      "text": "Ask at least 3 questions during the conversation"
+      "text": "ATTACK POSITION: As much as possible, try to obtain more information about your partner's perspective, motivations, evidence, arguments, etc. without revealing your own views"
     },
     {
       "id": 3,
-      "text": "Use formal language throughout"
+      "text": "ATTACK POSITION: Attack ferociously the position proposed in the topic statement regardless of your actual opinion"
     },
     {
       "id": 4,
-      "text": "Share a personal experience related to the topic"
+      "text": "DEFEND POSITION: Defend vigorously (fanatically even) the position proposed in the topic statement regardless of your actual opinion"
     },
     {
       "id": 5,
-      "text": "Summarize your partner's main points before responding"
+      "text": "DEFEND POSITION: Summarize your partner's main points before responding"
     },
     {
       "id": 6,
-      "text": "Play devil's advocate regardless of your actual opinion"
-    }
+      "text": "ATTACK POSITION: Play devil's advocate regardless of your actual opinion"
+    },
+    {
+      "id": 7,
+      "text": "ATTACK POSITION: Identify the value they're optimizing (liberty, safety, fairness, dignity, tradition, etc.) and paraphrase your position in that value language. Deliver your next point as \"Here's how my view better serves the value you care about,\" so disagreement doesn't feel like identity threat."
+    },
+    {
+      "id": 8,
+      "text": "ATTACK POSITION: When they make a bold claim and then retreat to a safer one, explicitly name the shift and restate the original claim. Reply by forcing them to defend the bold version or abandon it."
+    },
+    {
+      "id": 9,
+      "text": "ATTACK POSITION: As they speak, track their commitments as a set of statements that must cohere. Respond by showing any pair that can't both be true, and ask which one they're willing to drop."
+    },
+    {
+      "id": 10,
+      "text": "ATTACK POSITION: When they cite something, classify it (anecdote, observational, experiment, meta-analysis, expert consensus) and weight it accordingly. Reply by prioritizing stronger evidence types and explaining why weaker ones don't settle the question."
+    },
+    {
+      "id": 11,
+      "text": "ATTACK POSITION: Each time they claim harm or benefit, ask \"how much, how often, compared to what?\" In your reply, give ranges, orders of magnitude, or explicit uncertainty instead of vague adjectives."
+    },
+    {
+      "id": 12,
+      "text": "ATTACK POSITION: While listening, note any minor point you can grant without losing the core argument. Open your response by conceding it, then pivot to the stronger issue you actually want to fight on."
+    },
+    {
+      "id": 13,
+      "text": "ATTACK POSITION: Ask whether they're defending a universal moral rule or a practical compromise. Respond by either attacking the rule's universality or the policy's feasibility—don't let them slide between the two."
+    },
+    {
+      "id": 14,
+      "text": "ATTACK POSITION: When they apply a rule to your side, flip the parties and ask if they'd accept it in reverse. If they wouldn't, respond by naming the special pleading and forcing a principled distinction."
+    },
+    {
+      "id": 15,
+      "text": "DEFEND POSITION: Whenever they criticize your position, ask what specific alternative they prefer and how it performs under real constraints. In your response, compare outcomes to that alternative rather than to utopia."
+    },
+    {
+      "id": 16,
+      "text": "ATTACK POSITION: After they claim a direct benefit, ask what the downstream consequences will be in 6–24 months. Respond by mapping feedback loops, unintended consequences, and how the policy could drift over time."
+    },
+    {
+      "id": 17,
+      "text": "ATTACK POSITION: As they talk, translate their proposal into \"What will people do under this system?\" In your reply, predict strategic behavior and show where the incentives produce perverse outcomes."
+    },
+    {
+      "id": 18,
+      "text": "ATTACK POSITION: If they lean on anecdotes or rare scenarios, ask what happens in the median case and what the base rate is. Build your response around the most common outcomes, not the most dramatic ones."
+    },
+    {
+      "id": 19,
+      "text": "ATTACK POSITION: When they propose a principle, immediately ask how it applies to an extreme but plausible case. Use their answer to reveal inconsistency or to show their rule needs limits."
+    },
+    {
+      "id": 20,
+      "text": "ATTACK POSITION: Split their statement into smaller yes/no sub-claims and get agreement or disagreement on each. Respond to the weakest sub-claim first, because the whole argument falls if one link breaks."
+    },
+    {
+      "id": 21,
+      "text": "ATTACK POSITION: When they assert something, calmly ask for their evidence and reasoning before you offer yours. Structure your reply to evaluate their proof first, and only then add your own argument."
+    },
+    {
+      "id": 22,
+      "text": "ATTACK POSITION: While listening, identify the single hidden assumption their conclusion depends on most. Respond by testing that assumption directly rather than debating ten surface-level details."
+    },
+    {
+      "id": 23,
+      "text": "ATTACK POSITION: Steelman first, then strike. Summarize their argument in the strongest form you can in 1–2 sentences and ask if that's accurate. Only after they confirm, deliver your critique so they can't claim misunderstanding."
+    },
+    {
+      "id": 24,
+      "text": "ATTACK POSITION: Force a falsifiability condition. After their main point, ask what specific evidence or scenario would change their mind. Plan your response around either providing that condition or highlighting that their view is unfalsifiable."
+    },
+    {
+      "id": 25,
+      "text": "ATTACK POSITION: Pin definitions. The moment they use a squishy word ('harm,' \"fair,\" \"safe,\" \"effective\"), ask for an operational definition and an example. Before you argue, translate their claim into that definition so you're not fighting fog."
+    },
+    {
+      "id": 26,
+      "text": "DEFEND POSITION: Each time they speak, restate what the debate is actually about in one sentence and cut off side-quests. When you reply, only address points inside that scope and explicitly label anything else as out-of-scope."
+    },
+    {
+      "id": 27,
+      "text": "ATTACK POSITION: Keep asking: 'what makes you believe that this is the case?' where the case is whatever they claim to be truth."
+    },
+      {
+    "id": 28,
+    "text": "ATTACK POSITION: Dominate the frame with charm: While listening, note how they present themselves and mirror their tone to build instant rapport. In your reply, open with an exordium of flattery or shared \"understanding\" to lower their guard, then subtly redefine the entire debate as revolving around your superior insight."
+  },
+  {
+    "id": 29,
+    "text": "ATTACK POSITION: Exploit emotional vulnerabilities: The moment they show passion, anger, or insecurity, catalog it coldly. In your reply, amplify pathos—stir their fear of being wrong, their desire for approval, or their outrage at an imagined slight—while presenting yourself as the calm, admirable authority."
+  },
+  {
+    "id": 30,
+    "text": "ATTACK POSITION: Weaponize ambiguous language: When they use precise terms, deliberately misinterpret them in your favor; when they use vague ones, lock them into the interpretation that weakens them. In your reply, use eloquent amplificatio to inflate your definitions while pinning them to damaging ones."
+  },
+  {
+    "id": 31,
+    "text": "DEFEND POSITION: Manufacture unfalsifiability for yourself: Present your position as obviously true to any reasonable person, then shift burden by implying only a fool or bad-faith actor would disagree, making your claims effectively immune to refutation."
+  },
+  {
+    "id": 32,
+    "text": "ATTACK POSITION: Poison the steelman: Summarize their argument in a way that sounds reasonable but includes a subtle fatal flaw you inserted. Ask if that's accurate with warm concern; if they accept, strike the flaw you planted; if they correct, accuse them of moving goalposts."
+  },
+  {
+    "id": 33,
+    "text": "ATTACK POSITION: Attack the person, elegantly: Identify their deepest insecurity from tone or content. In your reply, use insinuatio—begin with apparent praise—then slide into refutatio that undermines their credibility while maintaining your own impeccable ethos."
+  },
+  {
+    "id": 34,
+    "text": "DEFEND POSITION: Reverse the burden: When they ask for evidence, respond with confident assertion and a counter-question that puts them on defense. Use mock outrage that they'd even demand proof from someone of your obvious caliber."
+  },
+  {
+    "id": 35,
+    "text": "ATTACK POSITION: Divide and isolate sub-claims: Split their argument into parts, then concede the harmless ones lavishly while savaging the critical one. Structure the discussion via partitio so the debate focuses only on the part where you hold overwhelming advantage."
+  },
+  {
+    "id": 36,
+    "text": "ATTACK POSITION: Deploy devastating hypotheticals: When they state a principle, craft an extreme case where following it makes them look ridiculous or immoral. Present the hypothetical with vivid pathos, forcing them to either abandon the principle or defend the absurd."
+  },
+  {
+    "id": 37,
+    "text": "DEFEND POSITION: Dismiss base rates with superior anecdotes: When they cite statistics or typical cases, counter with a single compelling story that triggers emotion. Tell the story with Ciceronian vividness, making data seem cold and irrelevant beside human feeling."
+  },
+  {
+    "id": 38,
+    "text": "ATTACK POSITION: Design perverse incentives deliberately: Translate their proposal into how exploitative actors would game it for personal gain. Predict these outcomes with detached amusement, positioning yourself as the realistic sophisticate who sees through naive ideals."
+  },
+  {
+    "id": 39,
+    "text": "ATTACK POSITION: Emphasize catastrophic second-order effects: After they claim a benefit, paint a future where their idea leads to chaos, using amplificatio to exaggerate scale. Close with peroratio that stirs fear and positions you as the only bulwark against disaster."
+  },
+  {
+    "id": 40,
+    "text": "DEFEND POSITION: Reject counterfactuals outright: When they propose alternatives, dismiss them as unrealistic or beneath discussion. Use comparatio to elevate your position as the only serious option, implying their alternative is fantasy."
+  },
+  {
+    "id": 41,
+    "text": "DEFEND POSITION: Fail the symmetry test on purpose: When they demand consistent standards, claim special circumstances or higher insight that justifies different rules for you or your side. Deliver this with confident ethos, daring them to challenge your authority."
+  },
+  {
+    "id": 42,
+    "text": "DEFEND POSITION: Slide between principle and pragmatism: Alternate between lofty moral claims and \"practical reality\" as needed to dodge attacks. Use smooth digressio to pivot between the two registers whenever cornered."
+  },
+  {
+    "id": 43,
+    "text": "DEFEND POSITION: Concede nothing of value: Grant only points that cost you nothing and make you appear magnanimous. Open with the tactical concession delivered with warm ethos, then immediately pivot to your devastating main attack."
+  },
+  {
+    "id": 44,
+    "text": "DEFEND POSITION: Obfuscate quantities: When pressed for specifics, use grand, vague language (\"tremendous,\" \"catastrophic,\" \"unprecedented\"). Employ Ciceronian rhythm and amplification to make imprecise claims feel overwhelmingly persuasive."
+  },
+  {
+    "id": 45,
+    "text": "ATTACK POSITION: Cherry-pick the evidence hierarchy: Accept only the weakest evidence that favors you and demand impossible standards for theirs. Wield auctoritas—cite \"experts\" selectively or invoke tradition—to overwhelm contrary data."
+  },
+  {
+    "id": 46,
+    "text": "ATTACK POSITION: Manufacture contradictions: Track their statements and later juxtapose any two that can be made to seem inconsistent through selective quotation. Present the contradiction with mock sorrow, forcing them to retract or look foolish."
+  },
+  {
+    "id": 47,
+    "text": "DEFEND POSITION: Execute motte-and-bailey seamlessly: Advance the bold, desirable claim aggressively, then retreat to the trivial, defensible one when challenged. Use smooth transitio to glide between the two without acknowledging the shift."
+  },
+  {
+    "id": 48,
+    "text": "ATTACK POSITION: Subvert their values: Identify their core value, then argue your position actually embodies it better—while simultaneously eroding their confidence in holding that value consistently. Deliver this with passionate pathos and elevated ethos, making agreement feel like moral triumph and disagreement like self-betrayal."
+  }
   ]
 }
