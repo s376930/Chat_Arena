@@ -28,13 +28,36 @@ class StorageService:
 
     # ==================== Conversation Storage ====================
 
+    def _save_conversation_sync(self, conversation: Conversation) -> bool:
+        """Synchronously save conversation to disk (for use in sync methods)."""
+        file_path = CONVERSATIONS_DIR / f"{conversation.session_id}.json"
+        try:
+            with open(file_path, "w") as f:
+                f.write(json.dumps(conversation.model_dump(), indent=2))
+            return True
+        except Exception as e:
+            print(f"Error saving conversation {conversation.session_id}: {e}")
+            return False
+
+    def _load_conversation_from_disk(self, session_id: str) -> Optional[Conversation]:
+        """Load a conversation from disk if it exists."""
+        file_path = CONVERSATIONS_DIR / f"{session_id}.json"
+        try:
+            if file_path.exists():
+                with open(file_path, "r") as f:
+                    data = json.load(f)
+                    return Conversation(**data)
+        except Exception as e:
+            print(f"Error loading conversation {session_id}: {e}")
+        return None
+
     def create_conversation(
         self,
         session_id: str,
         topic: str,
         participants: list[dict]
     ) -> Conversation:
-        """Create a new conversation in memory."""
+        """Create a new conversation and save to disk immediately."""
         conversation = Conversation(
             session_id=session_id,
             topic=topic,
@@ -43,6 +66,8 @@ class StorageService:
             started_at=datetime.utcnow().isoformat() + "Z"
         )
         self._conversations[session_id] = conversation
+        # Save to disk immediately for persistence across restarts/workers
+        self._save_conversation_sync(conversation)
         return conversation
 
     def add_message(
@@ -51,8 +76,18 @@ class StorageService:
         role: str,
         content: str
     ) -> Optional[ConversationMessage]:
-        """Add a message to a conversation."""
-        if session_id not in self._conversations:
+        """Add a message to a conversation and save to disk."""
+        # Try to get from memory first
+        conversation = self._conversations.get(session_id)
+
+        # If not in memory, try to load from disk (handles server restarts/multiple workers)
+        if conversation is None:
+            conversation = self._load_conversation_from_disk(session_id)
+            if conversation:
+                self._conversations[session_id] = conversation
+
+        if conversation is None:
+            print(f"Warning: Conversation {session_id} not found in memory or on disk")
             return None
 
         message = ConversationMessage(
@@ -60,25 +95,36 @@ class StorageService:
             content=content,
             timestamp=datetime.utcnow().isoformat() + "Z"
         )
-        self._conversations[session_id].messages.append(message)
+        conversation.messages.append(message)
+
+        # Save to disk immediately to persist messages
+        self._save_conversation_sync(conversation)
+
         return message
 
     async def end_conversation(self, session_id: str) -> bool:
-        """End a conversation and save to disk."""
-        if session_id not in self._conversations:
+        """End a conversation and save final state to disk."""
+        # Try to get from memory first
+        conversation = self._conversations.get(session_id)
+
+        # If not in memory, try to load from disk
+        if conversation is None:
+            conversation = self._load_conversation_from_disk(session_id)
+
+        if conversation is None:
             return False
 
-        conversation = self._conversations[session_id]
         conversation.ended_at = datetime.utcnow().isoformat() + "Z"
 
-        # Save to disk
+        # Save final state to disk
         file_path = CONVERSATIONS_DIR / f"{session_id}.json"
         try:
             async with aiofiles.open(file_path, "w") as f:
                 await f.write(json.dumps(conversation.model_dump(), indent=2))
 
-            # Remove from memory
-            del self._conversations[session_id]
+            # Remove from memory cache
+            if session_id in self._conversations:
+                del self._conversations[session_id]
             return True
         except Exception as e:
             print(f"Error saving conversation {session_id}: {e}")
