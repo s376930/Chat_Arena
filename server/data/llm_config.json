@@ -8,7 +8,7 @@
       "api_key_env": "ANTHROPIC_API_KEY"
     },
     "openai": {
-      "enabled": true,
+      "enabled": false,
       "model": "gpt-4o-mini",
       "api_key_env": "OPENAI_API_KEY"
     },
@@ -20,7 +20,7 @@
     },
     "ollama": {
       "enabled": true,
-      "model": "goekdenizguelmez/JOSIEFIED-Qwen3:latest",
+      "model": "llama3.2",
       "base_url": "http://localhost:11434"
     }
   },
