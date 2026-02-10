@@ -394,14 +394,6 @@ body {
     color: var(--text-secondary);
 }
 
-.task-bar.collapsed .task-content {
-    display: none;
-}
-
-.task-bar.collapsed .collapse-icon {
-    transform: rotate(180deg);
-}
-
 /* Waiting Screen */
 .waiting-screen {
     flex: 1;
