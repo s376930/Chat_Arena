@@ -1,12 +1,12 @@
 {
-  "enabled": true,
+  "enabled": false,
   "default_provider": "ollama",
   "providers": {
     "anthropic": {
       "enabled": false,
       "model": "claude-sonnet-4-20250514",
       "api_key_env": "ANTHROPIC_API_KEY"
-    },
+    },  
     "openai": {
       "enabled": false,
       "model": "gpt-4o-mini",
@@ -19,7 +19,7 @@
       "base_url": "https://api.x.ai/v1"
     },
     "ollama": {
-      "enabled": true,
+      "enabled": false,
       "model": "gemma3",
       "base_url": "http://localhost:11434"
     }
