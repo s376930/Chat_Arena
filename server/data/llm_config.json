@@ -1,5 +1,5 @@
 {
-  "enabled": true,
+  "enabled": false,
   "default_provider": "ollama",
   "providers": {
     "anthropic": {
@@ -8,7 +8,7 @@
       "api_key_env": "ANTHROPIC_API_KEY"
     },
     "openai": {
-      "enabled": true,
+      "enabled": false,
       "model": "gpt-4o-mini",
       "api_key_env": "OPENAI_API_KEY"
     },
