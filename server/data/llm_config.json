@@ -19,7 +19,7 @@
       "base_url": "https://api.x.ai/v1"
     },
     "ollama": {
-      "enabled": true, 
+      "enabled": false,
       "model": "llama3.2",
       "base_url": "http://localhost:11434"
     }
