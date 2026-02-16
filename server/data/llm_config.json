@@ -19,7 +19,7 @@
       "base_url": "https://api.x.ai/v1"
     },
     "ollama": {
-      "enabled": false, 
+      "enabled": true, 
       "model": "llama3.2",
       "base_url": "http://localhost:11434"
     }
@@ -27,8 +27,8 @@
   "behavior": {
     "idle_timeout_seconds": 300,
     "idle_check_interval_seconds": 30,
-    "response_delay_min_ms": 500,
-    "response_delay_max_ms": 3000
+    "response_delay_min_ms": 50,
+    "response_delay_max_ms": 200
   },
   "ai_participants": {
     "force_ai_on_odd_users": true,
