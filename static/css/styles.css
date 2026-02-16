@@ -319,15 +319,15 @@ body {
     content: attr(data-full-topic);
     position: absolute;
     top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    transform: none;
     background-color: var(--bg-primary);
     color: var(--text-primary);
     padding: 12px 16px;
     border-radius: 8px;
     font-size: 13px;
     max-width: 400px;
-    width: max-content;
+    width: auto;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     z-index: 100;
     opacity: 0;
