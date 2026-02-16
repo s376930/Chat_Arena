@@ -29,26 +29,28 @@ class WebSocketManager:
         """Accept a new WebSocket connection and create a session."""
         await websocket.accept()
         user_id = self.generate_user_id()
-        self.connections[user_id] = websocket
-        self.sessions[user_id] = UserSession(user_id=user_id)
+        async with self._session_lock:
+            self.connections[user_id] = websocket
+            self.sessions[user_id] = UserSession(user_id=user_id)
         return user_id
 
-    def disconnect(self, user_id: str) -> Optional[str]:
+    async def disconnect(self, user_id: str) -> Optional[str]:
         """
         Remove a user's connection and session.
         Returns the partner_id if the user was paired.
         """
-        partner_id = None
+        async with self._session_lock:
+            partner_id = None
 
-        if user_id in self.sessions:
-            session = self.sessions[user_id]
-            partner_id = session.partner_id
-            del self.sessions[user_id]
+            if user_id in self.sessions:
+                session = self.sessions[user_id]
+                partner_id = session.partner_id
+                del self.sessions[user_id]
 
-        if user_id in self.connections:
-            del self.connections[user_id]
+            if user_id in self.connections:
+                del self.connections[user_id]
 
-        return partner_id
+            return partner_id
 
     def get_session(self, user_id: str) -> Optional[UserSession]:
         """Get a user's session."""
