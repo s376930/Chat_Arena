@@ -32,7 +32,6 @@ const UI = {
         // Task bar
         this.elements.taskBar = document.getElementById('task-bar');
         this.elements.taskText = document.getElementById('task-text');
-        this.elements.taskToggle = document.getElementById('task-toggle');
 
         // Screens
         this.elements.waitingScreen = document.getElementById('waiting-screen');
@@ -65,11 +64,6 @@ const UI = {
     setupEventListeners() {
         // Theme toggle
         this.elements.themeToggle.addEventListener('click', () => this.toggleTheme());
-
-        // Task bar collapse
-        this.elements.taskToggle.addEventListener('click', () => {
-            this.elements.taskBar.classList.toggle('collapsed');
-        });
 
         // Instructions modal
         this.elements.instructionsBtn.addEventListener('click', () => {
