@@ -65,20 +65,13 @@ class WebSocketManager:
 
     async def send_json(self, user_id: str, data: dict) -> bool:
         """Send JSON data to a specific user. Returns True if successful."""
-        async with self._session_lock:
-            if user_id not in self.connections:
+        if user_id in self.connections:
+            try:
+                await self.connections[user_id].send_json(data)
+                return True
+            except Exception:
                 return False
-            websocket = self.connections[user_id]
-        
-        try:
-            await websocket.send_json(data)
-            return True
-        except Exception:
-            # Clean up stale connection on send failure
-            async with self._session_lock:
-                if user_id in self.connections:
-                    del self.connections[user_id]
-            return False
+        return False
 
     async def send_to_partner(self, user_id: str, data: dict) -> bool:
         """Send JSON data to a user's partner. Returns True if successful."""

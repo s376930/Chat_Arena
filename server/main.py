@@ -337,18 +337,12 @@ async def websocket_endpoint(websocket: WebSocket):
 
     try:
         while True:
-            # Add timeout to prevent hanging connections (60 seconds)
-            try:
-                data = await asyncio.wait_for(websocket.receive_json(), timeout=60.0)
-                await handle_message(user_id, data)
-            except asyncio.TimeoutError:
-                logger.warning(f"WebSocket timeout for {user_id}")
-                await handle_disconnect(user_id)
-                break
+            data = await websocket.receive_json()
+            await handle_message(user_id, data)
     except WebSocketDisconnect:
         await handle_disconnect(user_id)
     except Exception as e:
-        logger.error(f"WebSocket error for {user_id}: {e}")
+        print(f"WebSocket error for {user_id}: {e}")
         await handle_disconnect(user_id)
 
 
