@@ -103,8 +103,8 @@ class PairingService:
                 break
             checked_users.append(candidate)
 
-        # Put checked users back in queue
-        for u in checked_users:
+        # Put checked users back in queue in same order (reverse before appendleft to maintain order)
+        for u in reversed(checked_users):
             self.queue.appendleft(u)
 
         if partner_id:
