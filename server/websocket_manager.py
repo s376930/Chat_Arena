@@ -65,9 +65,14 @@ class WebSocketManager:
 
     async def send_json(self, user_id: str, data: dict) -> bool:
         """Send JSON data to a specific user. Returns True if successful."""
-        if user_id in self.connections:
+        # Get connection reference while holding lock to prevent race condition
+        ws = None
+        async with self._session_lock:
+            ws = self.connections.get(user_id)
+        
+        if ws:
             try:
-                await self.connections[user_id].send_json(data)
+                await ws.send_json(data)
                 return True
             except Exception:
                 return False
@@ -75,20 +80,31 @@ class WebSocketManager:
 
     async def send_to_partner(self, user_id: str, data: dict) -> bool:
         """Send JSON data to a user's partner. Returns True if successful."""
-        session = self.get_session(user_id)
-        if not session or not session.partner_id:
-            return False
+        # Hold lock during partner verification to prevent race conditions
+        ws = None
+        async with self._session_lock:
+            session = self.get_session(user_id)
+            if not session or not session.partner_id:
+                return False
 
-        # Verify partner still considers us their partner (prevents cross-talk)
-        partner_session = self.get_session(session.partner_id)
-        if partner_session and partner_session.partner_id == user_id:
-            return await self.send_json(session.partner_id, data)
-
-        # For AI partners, check AI sessions instead
-        ai_session = self.get_ai_session(session.partner_id)
-        if ai_session and ai_session.partner_id == user_id:
-            return await self.send_json(session.partner_id, data)
-
+            partner_id = session.partner_id
+            # Verify partner still considers us their partner (prevents cross-talk)
+            partner_session = self.get_session(partner_id)
+            if partner_session and partner_session.partner_id == user_id:
+                ws = self.connections.get(partner_id)
+            else:
+                # For AI partners, check AI sessions instead
+                ai_session = self.get_ai_session(partner_id)
+                if ai_session and ai_session.partner_id == user_id:
+                    ws = self.connections.get(partner_id)
+        
+        # Send outside lock to avoid holding it during async operation
+        if ws:
+            try:
+                await ws.send_json(data)
+                return True
+            except Exception:
+                return False
         return False
 
     def is_paired(self, user_id: str) -> bool:

@@ -433,8 +433,9 @@ async def try_pairing(user_id: str):
 
     if not paired:
         # Pairing failed (one user disconnected or already paired)
-        # Put the user who initiated back in queue
+        # Put BOTH users back in queue
         await pairing_service.add_to_queue_atomic(user_id)
+        await pairing_service.add_to_queue_atomic(partner_id)
         logger.warning(f"Atomic pairing failed for {user_id} and {partner_id}")
         return
 
@@ -678,7 +679,7 @@ async def handle_disconnect(user_id: str):
     # Remove from queue and disconnect (atomic)
     await pairing_service.remove_from_queue_atomic(user_id)
     pairing_service.remove_delay(user_id)  # Clean up any pending delay
-    manager.disconnect(user_id)
+    await manager.disconnect(user_id)
 
 
 # ==================== Whisper Transcription API ====================
