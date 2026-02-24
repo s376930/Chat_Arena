@@ -856,7 +856,7 @@ async def get_data_file(filename: str, authorized: bool = Depends(verify_admin_p
         raise HTTPException(status_code=404, detail="File not found")
 
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
         return {"name": filename, "content": content}
     except Exception as e:
@@ -878,7 +878,7 @@ async def update_data_file(filename: str, file_content: FileContent, authorized:
         # Validate JSON
         json.loads(file_content.content)
 
-        with open(filepath, 'w') as f:
+        with open(filepath, 'w', encoding='utf-8') as f:
             f.write(file_content.content)
 
         # Reload topics/tasks if that file was updated
@@ -971,7 +971,7 @@ async def list_conversations(authorized: bool = Depends(verify_admin_password)):
                 stat = f.stat()
                 # Try to read basic info
                 try:
-                    with open(f, 'r') as file:
+                    with open(f, 'r', encoding='utf-8') as file:
                         data = json.load(file)
                         conversations.append({
                             "session_id": f.stem,
@@ -983,7 +983,7 @@ async def list_conversations(authorized: bool = Depends(verify_admin_password)):
                             "started_at": data.get("started_at"),
                             "ended_at": data.get("ended_at")
                         })
-                except:
+                except Exception:
                     conversations.append({
                         "session_id": f.stem,
                         "filename": f.name,
@@ -1009,7 +1009,7 @@ async def get_conversation(session_id: str, authorized: bool = Depends(verify_ad
         raise HTTPException(status_code=404, detail="Conversation not found")
 
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             content = json.load(f)
         return content
     except Exception as e:

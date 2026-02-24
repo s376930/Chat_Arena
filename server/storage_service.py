@@ -32,7 +32,7 @@ class StorageService:
         """Synchronously save conversation to disk (for use in sync methods)."""
         file_path = CONVERSATIONS_DIR / f"{conversation.session_id}.json"
         try:
-            with open(file_path, "w") as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 f.write(json.dumps(conversation.model_dump(), indent=2))
             return True
         except Exception as e:
@@ -44,7 +44,7 @@ class StorageService:
         file_path = CONVERSATIONS_DIR / f"{session_id}.json"
         try:
             if file_path.exists():
-                with open(file_path, "r") as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     return Conversation(**data)
         except Exception as e:
@@ -119,7 +119,7 @@ class StorageService:
         # Save final state to disk
         file_path = CONVERSATIONS_DIR / f"{session_id}.json"
         try:
-            async with aiofiles.open(file_path, "w") as f:
+            async with aiofiles.open(file_path, "w", encoding="utf-8") as f:
                 await f.write(json.dumps(conversation.model_dump(), indent=2))
 
             # Remove from memory cache
@@ -139,7 +139,7 @@ class StorageService:
     async def load_topics_tasks(self) -> TopicsTasksData:
         """Load topics and tasks from JSON file."""
         try:
-            async with aiofiles.open(TOPICS_TASKS_FILE, "r") as f:
+            async with aiofiles.open(TOPICS_TASKS_FILE, "r", encoding="utf-8") as f:
                 content = await f.read()
                 data = json.loads(content)
                 return TopicsTasksData(**data)
@@ -149,7 +149,7 @@ class StorageService:
     async def save_topics_tasks(self, data: TopicsTasksData) -> bool:
         """Save topics and tasks to JSON file."""
         try:
-            async with aiofiles.open(TOPICS_TASKS_FILE, "w") as f:
+            async with aiofiles.open(TOPICS_TASKS_FILE, "w", encoding="utf-8") as f:
                 await f.write(json.dumps(data.model_dump(), indent=2))
             return True
         except Exception as e:
@@ -219,7 +219,7 @@ class StorageService:
     async def load_consent(self) -> ConsentData:
         """Load consent configuration from JSON file."""
         try:
-            async with aiofiles.open(CONSENT_FILE, "r") as f:
+            async with aiofiles.open(CONSENT_FILE, "r", encoding="utf-8") as f:
                 content = await f.read()
                 return ConsentData(**json.loads(content))
         except FileNotFoundError:
@@ -233,7 +233,7 @@ class StorageService:
     async def save_consent(self, data: ConsentData) -> bool:
         """Save consent configuration to JSON file."""
         try:
-            async with aiofiles.open(CONSENT_FILE, "w") as f:
+            async with aiofiles.open(CONSENT_FILE, "w", encoding="utf-8") as f:
                 await f.write(json.dumps(data.model_dump(), indent=2))
             return True
         except Exception as e:
