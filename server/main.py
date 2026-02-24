@@ -109,7 +109,7 @@ async def pair_with_ai(user_id: str) -> bool:
         await pairing_service.remove_from_queue_atomic(user_id)
 
         # Update user session
-        manager.update_session(
+        await manager.update_session(
             user_id,
             paired=True,
             partner_id=ai_id,
@@ -119,7 +119,7 @@ async def pair_with_ai(user_id: str) -> bool:
         )
 
         # Set initial activity timestamp
-        manager.update_activity(user_id)
+        await manager.update_activity(user_id)
 
         # Create AI session record in websocket manager
         manager.create_ai_session(
@@ -190,7 +190,7 @@ async def check_inactive_users():
     while True:
         await asyncio.sleep(60)  # Check every minute
 
-        inactive_users = manager.get_inactive_users(INACTIVITY_TIMEOUT_SECONDS)
+        inactive_users = await manager.get_inactive_users(INACTIVITY_TIMEOUT_SECONDS)
 
         for user_id in inactive_users:
             logger.info(f"Kicking inactive user: {user_id}")
@@ -256,7 +256,7 @@ async def handle_inactivity_kick(user_id: str):
     pairing_service.remove_delay(user_id)
     await manager.clear_pairing_atomic(user_id)
     # Reset their consent status so they need to rejoin
-    manager.update_session(user_id, consented=False, last_activity=None)
+    await manager.update_session(user_id, consented=False, last_activity=None)
 
 
 @asynccontextmanager
@@ -369,8 +369,8 @@ async def handle_join(user_id: str, data: dict):
         })
         return
 
-    manager.update_session(user_id, consented=True)
-    manager.update_activity(user_id)  # Track activity
+    await manager.update_session(user_id, consented=True)
+    await manager.update_activity(user_id)  # Track activity
 
     # Add to queue (atomic)
     position = await pairing_service.add_to_queue_atomic(user_id)
@@ -500,7 +500,7 @@ async def handle_chat_message(user_id: str, data: dict):
             return
 
     # Update activity timestamp
-    manager.update_activity(user_id)
+    await manager.update_activity(user_id)
 
     think = data.get("think", "")
     speech = data.get("speech", "")

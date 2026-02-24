@@ -56,12 +56,13 @@ class WebSocketManager:
         """Get a user's session."""
         return self.sessions.get(user_id)
 
-    def update_session(self, user_id: str, **kwargs) -> None:
+    async def update_session(self, user_id: str, **kwargs) -> None:
         """Update a user's session with the given fields."""
-        if user_id in self.sessions:
-            for key, value in kwargs.items():
-                if hasattr(self.sessions[user_id], key):
-                    setattr(self.sessions[user_id], key, value)
+        async with self._session_lock:
+            if user_id in self.sessions:
+                for key, value in kwargs.items():
+                    if hasattr(self.sessions[user_id], key):
+                        setattr(self.sessions[user_id], key, value)
 
     async def send_json(self, user_id: str, data: dict) -> bool:
         """Send JSON data to a specific user. Returns True if successful."""
@@ -74,7 +75,7 @@ class WebSocketManager:
             try:
                 await ws.send_json(data)
                 return True
-            except Exception:
+            except (RuntimeError, ConnectionError) as e:
                 return False
         return False
 
@@ -103,30 +104,32 @@ class WebSocketManager:
             try:
                 await ws.send_json(data)
                 return True
-            except Exception:
+            except (RuntimeError, ConnectionError) as e:
                 return False
         return False
 
-    def is_paired(self, user_id: str) -> bool:
+    async def is_paired(self, user_id: str) -> bool:
         """Check if a user is currently paired."""
-        session = self.get_session(user_id)
-        return session is not None and session.paired
+        async with self._session_lock:
+            session = self.sessions.get(user_id)
+            return session is not None and session.paired
 
-    def get_partner_id(self, user_id: str) -> Optional[str]:
+    async def get_partner_id(self, user_id: str) -> Optional[str]:
         """Get a user's partner ID."""
-        session = self.get_session(user_id)
-        return session.partner_id if session else None
+        async with self._session_lock:
+            session = self.sessions.get(user_id)
+            return session.partner_id if session else None
 
-    def clear_pairing(self, user_id: str) -> None:
+    async def clear_pairing(self, user_id: str) -> None:
         """Clear a user's pairing status."""
-        self.update_session(
-            user_id,
-            paired=False,
-            partner_id=None,
-            session_id=None,
-            task=None,
-            is_ai_partner=False
-        )
+        async with self._session_lock:
+            if user_id in self.sessions:
+                session = self.sessions[user_id]
+                session.paired = False
+                session.partner_id = None
+                session.session_id = None
+                session.task = None
+                session.is_ai_partner = False
 
     async def pair_users_atomic(
         self,
@@ -204,23 +207,25 @@ class WebSocketManager:
                 partner_session.partner_id == user_id
             )
 
-    def update_activity(self, user_id: str) -> None:
+    async def update_activity(self, user_id: str) -> None:
         """Update a user's last activity timestamp."""
-        if user_id in self.sessions:
-            self.sessions[user_id].last_activity = datetime.now()
+        async with self._session_lock:
+            if user_id in self.sessions:
+                self.sessions[user_id].last_activity = datetime.now()
 
-    def get_inactive_users(self, timeout_seconds: int) -> list[str]:
+    async def get_inactive_users(self, timeout_seconds: int) -> list[str]:
         """Get list of user IDs that have been inactive for longer than timeout."""
-        inactive_users = []
-        cutoff_time = datetime.now() - timedelta(seconds=timeout_seconds)
+        async with self._session_lock:
+            inactive_users = []
+            cutoff_time = datetime.now() - timedelta(seconds=timeout_seconds)
 
-        for user_id, session in self.sessions.items():
-            # Only check users who are paired (in an active conversation)
-            if session.paired and session.last_activity:
-                if session.last_activity < cutoff_time:
-                    inactive_users.append(user_id)
+            for user_id, session in self.sessions.items():
+                # Only check users who are paired (in an active conversation)
+                if session.paired and session.last_activity:
+                    if session.last_activity < cutoff_time:
+                        inactive_users.append(user_id)
 
-        return inactive_users
+            return inactive_users
 
     # AI session management methods
 
@@ -257,12 +262,13 @@ class WebSocketManager:
         """Get an AI session by ID."""
         return self.ai_sessions.get(ai_id)
 
-    def get_ai_session_by_partner(self, partner_id: str) -> Optional[AISession]:
+    async def get_ai_session_by_partner(self, partner_id: str) -> Optional[AISession]:
         """Get the AI session for a given human partner."""
-        for ai_session in self.ai_sessions.values():
-            if ai_session.partner_id == partner_id and ai_session.is_active:
-                return ai_session
-        return None
+        async with self._session_lock:
+            for ai_session in self.ai_sessions.values():
+                if ai_session.partner_id == partner_id and ai_session.is_active:
+                    return ai_session
+            return None
 
     def update_ai_session(self, ai_id: str, **kwargs) -> None:
         """Update an AI session with the given fields."""
@@ -280,13 +286,15 @@ class WebSocketManager:
         """Check if a user ID belongs to an AI participant."""
         return user_id in self.ai_sessions or user_id.startswith("ai_")
 
-    def get_all_ai_sessions(self) -> list[AISession]:
+    async def get_all_ai_sessions(self) -> list[AISession]:
         """Get all AI sessions."""
-        return list(self.ai_sessions.values())
+        async with self._session_lock:
+            return list(self.ai_sessions.values())
 
-    def get_active_ai_count(self) -> int:
+    async def get_active_ai_count(self) -> int:
         """Get the number of active AI sessions."""
-        return sum(1 for s in self.ai_sessions.values() if s.is_active)
+        async with self._session_lock:
+            return sum(1 for s in self.ai_sessions.values() if s.is_active)
 
 
 # Global instance
