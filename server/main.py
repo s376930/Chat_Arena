@@ -335,20 +335,45 @@ async def get_consent():
 
 # ==================== WebSocket Handler ====================
 
+
+import time
+
+HEARTBEAT_INTERVAL = 10  # seconds
+HEARTBEAT_TIMEOUT = 30   # seconds
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    """Main WebSocket endpoint for chat functionality."""
+    """Main WebSocket endpoint for chat functionality with heartbeat."""
     user_id = await manager.connect(websocket)
+    last_heartbeat = time.time()
+
+    async def heartbeat_monitor():
+        nonlocal last_heartbeat
+        while True:
+            await asyncio.sleep(HEARTBEAT_INTERVAL)
+            if time.time() - last_heartbeat > HEARTBEAT_TIMEOUT:
+                await handle_disconnect(user_id)
+                await websocket.close()
+                break
+
+    monitor_task = asyncio.create_task(heartbeat_monitor())
 
     try:
         while True:
             data = await websocket.receive_json()
+            if data.get("type") == "ping":
+                # Respond to ping
+                await websocket.send_json({"type": "pong"})
+                last_heartbeat = time.time()
+                continue
             await handle_message(user_id, data)
     except WebSocketDisconnect:
         await handle_disconnect(user_id)
     except Exception as e:
         print(f"WebSocket error for {user_id}: {e}")
         await handle_disconnect(user_id)
+    finally:
+        monitor_task.cancel()
 
 
 async def handle_message(user_id: str, data: dict):
