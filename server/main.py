@@ -355,7 +355,13 @@ async def handle_message(user_id: str, data: dict):
     """Handle incoming WebSocket messages."""
     msg_type = data.get("type")
 
-    if msg_type == "join":
+    if msg_type == "ping":
+        await manager.send_json(user_id, {"type": "pong"})
+    elif msg_type == "pong":
+        # Update last_pong timestamp when pong is received
+        from datetime import datetime
+        await manager.update_session(user_id, last_pong=datetime.now())
+    elif msg_type == "join":
         await handle_join(user_id, data)
     elif msg_type == "message":
         await handle_chat_message(user_id, data)

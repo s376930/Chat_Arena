@@ -23,12 +23,18 @@ class WebSocketClient {
             console.log('WebSocket connected');
             this.reconnectAttempts = 0;
             this.trigger('connected');
+
+            // Start heartbeat
+            this.startHeartbeat();
         };
 
         this.socket.onclose = (event) => {
             console.log('WebSocket closed:', event.code, event.reason);
             this.trigger('disconnected');
             this.attemptReconnect();
+
+            // Stop heartbeat
+            this.stopHeartbeat();
         };
 
         this.socket.onerror = (error) => {
@@ -39,11 +45,44 @@ class WebSocketClient {
         this.socket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
+                // Handle pong for heartbeat
+                if (data.type === 'pong') {
+                    this.lastPong = Date.now();
+                    return;
+                }
                 this.handleMessage(data);
             } catch (e) {
                 console.error('Failed to parse message:', e);
             }
         };
+    }
+
+    /**
+     * Start sending heartbeat pings
+     */
+    startHeartbeat() {
+        this.lastPong = Date.now();
+        if (this.heartbeatInterval) return;
+        this.heartbeatInterval = setInterval(() => {
+            if (this.isConnected()) {
+                this.send({ type: 'ping' });
+                // Optionally, check for missed pong
+                if (Date.now() - this.lastPong > 30000) {
+                    console.warn('No pong received from server, closing socket');
+                    this.socket.close();
+                }
+            }
+        }, 10000); // 10 seconds
+    }
+
+    /**
+     * Stop heartbeat pings
+     */
+    stopHeartbeat() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = null;
+        }
     }
 
     /**
@@ -146,6 +185,7 @@ class WebSocketClient {
         if (this.socket) {
             this.socket.close();
         }
+        this.stopHeartbeat();
     }
 
     /**
