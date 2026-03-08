@@ -9,4 +9,8 @@ Bugs
 -If you only have 3 topics, you get the error "No topics or tasks available"
 
 Additions
--Added a mode to running the app with `python run.py --mode server` which just makes the conversations logs get saved to `disk/conversations` which is the filepath I made for a disk on Render. To run the app localy just run `python run.py` as before.
+-Added explicit conversations path override: use `python run.py --conversations-dir /disk/conversations` on Render so chat logs are persisted to disk. Running `python run.py` keeps local defaults.
+
+Downloading files from Render using web-interface & magic wormhole:
+1. open webshell in Render
+2. `\wormhole send myfile.zip`

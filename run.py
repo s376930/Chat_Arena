@@ -27,12 +27,6 @@ sys.path.insert(0, str(PROJECT_ROOT))
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run Chat Arena server")
     parser.add_argument(
-        "--mode",
-        choices=["local", "server"],
-        default="local",
-        help="local keeps conversations in server/data; server stores in disk/",
-    )
-    parser.add_argument(
         "--conversations-dir",
         default=None,
         help="override conversations directory path explicitly",
@@ -48,8 +42,6 @@ def parse_args() -> argparse.Namespace:
 def resolve_conversations_dir(args: argparse.Namespace) -> Path:
     if args.conversations_dir:
         return Path(args.conversations_dir).expanduser().resolve()
-    if args.mode == "server":
-        return (PROJECT_ROOT / "disk" / "conversations").resolve()
     return (PROJECT_ROOT / "server" / "data" / "conversations").resolve()
 
 
@@ -62,13 +54,12 @@ def main():
 
     from server.config import HOST, PORT
 
-    reload_enabled = (args.mode == "local") and (not args.no_reload)
+    reload_enabled = not args.no_reload
 
     print("=" * 50)
     print("  Chat Arena - Real-time Research Chat Platform")
     print("=" * 50)
     print()
-    print(f"  Mode: {args.mode}")
     print(f"  Conversations dir: {conversations_dir}")
     print(f"  Starting server at http://{HOST}:{PORT}")
     print(f"  Admin page: http://{HOST}:{PORT}/admin")

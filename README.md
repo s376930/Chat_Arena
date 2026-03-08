@@ -33,7 +33,7 @@ python run.py
 For hosted/server deployments that should persist conversations in `disk/`:
 
 ```bash
-python run.py --mode server
+python run.py --conversations-dir /disk/conversations
 ```
 
 To use a custom conversations path (for example, mounted external storage):
