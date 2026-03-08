@@ -16,18 +16,60 @@ Environment variables:
 import uvicorn
 import sys
 import os
+import argparse
+from pathlib import Path
 
 # Add the project root to the path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = Path(os.path.abspath(__file__)).parent
+sys.path.insert(0, str(PROJECT_ROOT))
 
-from server.config import HOST, PORT
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run Chat Arena server")
+    parser.add_argument(
+        "--mode",
+        choices=["local", "server"],
+        default="local",
+        help="local keeps conversations in server/data; server stores in disk/",
+    )
+    parser.add_argument(
+        "--conversations-dir",
+        default=None,
+        help="override conversations directory path explicitly",
+    )
+    parser.add_argument(
+        "--no-reload",
+        action="store_true",
+        help="disable uvicorn reload even in local mode",
+    )
+    return parser.parse_args()
+
+
+def resolve_conversations_dir(args: argparse.Namespace) -> Path:
+    if args.conversations_dir:
+        return Path(args.conversations_dir).expanduser().resolve()
+    if args.mode == "server":
+        return (PROJECT_ROOT / "disk" / "conversations").resolve()
+    return (PROJECT_ROOT / "server" / "data" / "conversations").resolve()
 
 
 def main():
+    args = parse_args()
+    conversations_dir = resolve_conversations_dir(args)
+    conversations_dir.mkdir(parents=True, exist_ok=True)
+
+    os.environ["CHAT_ARENA_CONVERSATIONS_DIR"] = str(conversations_dir)
+
+    from server.config import HOST, PORT
+
+    reload_enabled = (args.mode == "local") and (not args.no_reload)
+
     print("=" * 50)
     print("  Chat Arena - Real-time Research Chat Platform")
     print("=" * 50)
     print()
+    print(f"  Mode: {args.mode}")
+    print(f"  Conversations dir: {conversations_dir}")
     print(f"  Starting server at http://{HOST}:{PORT}")
     print(f"  Admin page: http://{HOST}:{PORT}/admin")
     print()
@@ -39,7 +81,7 @@ def main():
         "server.main:app",
         host=HOST,
         port=PORT,
-        reload=True,
+        reload=reload_enabled,
         log_level="info"
     )
 
