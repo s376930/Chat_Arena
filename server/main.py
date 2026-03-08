@@ -536,7 +536,7 @@ async def handle_chat_message(user_id: str, data: dict):
 
     # Store message
     storage_service.add_message(
-        session_id=session.session_id,
+        session_id=session.session_id, # type: ignore
         role=user_id,
         content=content
     )
@@ -636,7 +636,7 @@ async def transcribe_audio(audio: UploadFile = File(...)):
         raise HTTPException(status_code=503, detail="Whisper API not configured")
 
     try:
-        from openai import OpenAI
+        from openai import OpenAI # type: ignore
         client = OpenAI(api_key=OPENAI_API_KEY)
 
         # Read audio file
