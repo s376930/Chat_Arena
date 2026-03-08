@@ -312,6 +312,13 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # ==================== HTML Routes ====================
 
+# ==================== Healthcheck Route ====================
+
+@app.get("/healthcheck")
+async def healthcheck():
+    """Healthcheck endpoint for service monitoring."""
+    return {"status": "ok"}
+
 @app.get("/")
 async def serve_index():
     """Serve the main chat interface."""
