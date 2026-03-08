@@ -13,4 +13,5 @@ Additions
 
 Downloading files from Render using web-interface & magic wormhole:
 1. open webshell in Render
-2. `\wormhole send myfile.zip`
+2. in webshell: `\wormhole send myfile.zip` <- This returns a secret
+3. in local terminal after running `pip install magic-wormhole` -> `wormhole recieve secret`
