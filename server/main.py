@@ -51,7 +51,9 @@ async def handle_ai_message(ai_id: str, think: str, speech: str):
     storage_service.add_message(
         session_id=session_id,
         role=ai_id,
-        content=content
+        content=content,
+        think=think,
+        speech=speech
     )
 
     # Send to human partner (only the speech part)
@@ -538,7 +540,9 @@ async def handle_chat_message(user_id: str, data: dict):
     storage_service.add_message(
         session_id=session.session_id,
         role=user_id,
-        content=content
+        content=content,
+        think=think,
+        speech=speech
     )
 
     timestamp = datetime.utcnow().isoformat() + "Z"

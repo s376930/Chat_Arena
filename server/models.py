@@ -101,6 +101,8 @@ class Participant(BaseModel):
 class ConversationMessage(BaseModel):
     role: str
     content: str
+    think: Optional[str] = None
+    speech: Optional[str] = None
     timestamp: str
 
 
