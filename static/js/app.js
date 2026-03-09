@@ -51,7 +51,7 @@ const App = {
         });
 
         wsClient.on('reconnectFailed', () => {
-            UI.showError('Connection lost. Please refresh the page.');
+            UI.showError('Tilkoblingen ble brutt. Vennligst oppdater siden.');
         });
 
         wsClient.on('waiting', (data) => {
@@ -123,12 +123,12 @@ const App = {
         const { think, speech } = UI.getInputValues();
 
         if (think.length < 10) {
-            UI.showError('Please write at least 10 characters in the Think field.');
+            UI.showError('Vennligst skriv minst 10 tegn i Tenk-feltet.');
             return;
         }
 
         if (!speech.trim()) {
-            UI.showError('Please write something in the Speech field.');
+            UI.showError('Vennligst skriv noe i feltet.');
             return;
         }
 
@@ -139,7 +139,7 @@ const App = {
      * Handle reassign request
      */
     handleReassign() {
-        if (confirm('Are you sure you want to find a new partner? This will end your current conversation.')) {
+        if (confirm('Er du sikker på at du vil finne en ny partner? Dette avslutter den nåværende samtalen.')) {
             wsClient.requestReassign();
             this.sessionId = null;
         }

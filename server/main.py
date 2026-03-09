@@ -376,7 +376,7 @@ async def handle_join(user_id: str, data: dict):
     if not data.get("consent"):
         await manager.send_json(user_id, {
             "type": "error",
-            "message": "Consent required to participate"
+            "message": "Samtykke er påkrevd for å delta"
         })
         return
 
@@ -422,11 +422,11 @@ async def try_pairing(user_id: str):
         await pairing_service.add_to_queue_atomic(partner_id)
         await manager.send_json(user_id, {
             "type": "error",
-            "message": "No topics or tasks available. Please try again later."
+            "message": "Ingen emner eller oppgaver tilgjengelig. Prøv igjen senere."
         })
         await manager.send_json(partner_id, {
             "type": "error",
-            "message": "No topics or tasks available. Please try again later."
+            "message": "Ingen emner eller oppgaver tilgjengelig. Prøv igjen senere."
         })
         return
 
@@ -485,7 +485,7 @@ async def handle_chat_message(user_id: str, data: dict):
     if not session or not session.paired:
         await manager.send_json(user_id, {
             "type": "error",
-            "message": "You are not in an active chat session"
+            "message": "Du er ikke i en aktiv økt"
         })
         return
 
@@ -494,7 +494,7 @@ async def handle_chat_message(user_id: str, data: dict):
     if not partner_id:
         await manager.send_json(user_id, {
             "type": "error",
-            "message": "Partner connection lost"
+            "message": "Partnertilkoblingen ble brutt"
         })
         return
 
@@ -504,7 +504,7 @@ async def handle_chat_message(user_id: str, data: dict):
         if not partner_session or partner_session.partner_id != user_id:
             await manager.send_json(user_id, {
                 "type": "error",
-                "message": "Partner connection lost"
+                "message": "Partnertilkoblingen ble brutt"
             })
             # Clear the broken pairing
             await manager.clear_pairing_atomic(user_id)
@@ -520,14 +520,14 @@ async def handle_chat_message(user_id: str, data: dict):
     if len(think) < MIN_THINK_CHARS:
         await manager.send_json(user_id, {
             "type": "error",
-            "message": f"Think field must be at least {MIN_THINK_CHARS} characters"
+            "message": f"Tanke-feltet må være minst {MIN_THINK_CHARS} tegn"
         })
         return
 
     if not speech.strip():
         await manager.send_json(user_id, {
             "type": "error",
-            "message": "Speech field cannot be empty"
+            "message": "Tale-feltet kan ikke være tomt"
         })
         return
 

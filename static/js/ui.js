@@ -176,7 +176,7 @@ const UI = {
     setConnectionStatus(connected) {
         this.elements.connectionStatus.classList.toggle('connected', connected);
         this.elements.connectionStatus.classList.toggle('disconnected', !connected);
-        this.elements.connectionStatus.title = connected ? 'Connected' : 'Disconnected';
+        this.elements.connectionStatus.title = connected ? 'Tilkoblet' : 'Frakoblet';
     },
 
     /**
@@ -218,7 +218,7 @@ const UI = {
         this.elements.chatMessages.innerHTML = '';
 
         // Add system message
-        this.addSystemMessage('You have been paired with a partner. Start the conversation!');
+        this.addSystemMessage('Partner funnet!');
 
         // Reset inputs
         this.resetInputs();
@@ -312,7 +312,7 @@ const UI = {
      * Show partner left message
      */
     showPartnerLeft() {
-        this.addSystemMessage('Your partner has left the conversation.');
+        this.addSystemMessage('Partneren din har forlatt samtalen.');
         this.elements.sendBtn.disabled = true;
         this.elements.speechInput.disabled = true;
         this.elements.speechMicBtn.disabled = true;
