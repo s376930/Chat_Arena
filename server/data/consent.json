@@ -1,10 +1,10 @@
 {
-  "title": "Research Participation Consent",
+  "title": "Samtykke til forskningsdeltakelse",
   "version": "1.0",
-  "content": "Thank you for your interest in participating in this research study. This study aims to understand how people communicate and collaborate in online conversations.\n\nBy participating, you agree to:\n- Have your conversation messages recorded and stored for research purposes\n- Allow researchers to analyze the content of your conversations\n- Understand that your identity will remain anonymous\n\nYour participation is voluntary. You may leave at any time without penalty.",
+  "content": "Takk for din interesse i å delta i denne forskningsstudien. Studien har som mål å forstå hvordan mennesker kommuniserer og samarbeider i nettbaserte samtaler.\n\nVed å delta samtykker du til:\n- At samtalemeldingene dine blir registrert og lagret for forskningsformål\n- At forskere kan analysere innholdet i samtalene dine\n- At din identitet forblir anonym\n\nDin deltakelse er frivillig. Du kan trekke deg når som helst uten konsekvenser.",
   "checkboxes": [
-    "I am 18 years or older",
-    "I consent to data collection for research purposes",
-    "I understand my conversations will be recorded"
+    "Jeg er 18 år eller eldre",
+    "Jeg samtykker til datainnsamling for forskningsformål",
+    "Jeg forstår at samtalene mine blir registrert"
   ]
 }
