@@ -29,10 +29,13 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 XAI_API_KEY = os.getenv("XAI_API_KEY", "")
 
 # Minimum characters required in "think" field before "speech" is enabled
-MIN_THINK_CHARS = 10
+MIN_THINK_CHARS = 50
 
-# Inactivity timeout in seconds (10 minutes)
-INACTIVITY_TIMEOUT_SECONDS = int(os.getenv("INACTIVITY_TIMEOUT_SECONDS", "600"))
+# Maximum conversation duration in seconds (15 minutes)
+MAX_CONVERSATION_SECONDS = int(os.getenv("MAX_CONVERSATION_SECONDS", "900"))
+
+# Inactivity timeout in seconds (15 minutes)
+INACTIVITY_TIMEOUT_SECONDS = int(os.getenv("INACTIVITY_TIMEOUT_SECONDS", "900"))
 
 # Admin password (hashed for security)
 ADMIN_PASSWORD = "@Azimute82118791!"

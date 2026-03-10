@@ -62,12 +62,16 @@ const App = {
         wsClient.on('paired', (data) => {
             console.log('Paired!', data);
             this.sessionId = data.session_id;
-            UI.showChat(data.topic, data.task);
+            UI.showChat(data.topic, data.task, data.max_time);
         });
 
         wsClient.on('partnerMessage', (data) => {
             console.log('Partner message:', data);
             UI.addMessage(data.content, false, data.timestamp);
+            // Reset inactivity timer on partner message
+            if (data.max_time) {
+                UI.startTimer(data.max_time);
+            }
         });
 
         wsClient.on('messageSent', (data) => {
@@ -75,6 +79,10 @@ const App = {
             const { speech } = UI.getInputValues();
             UI.addMessage(speech, true, data.timestamp);
             UI.resetInputs();
+            // Reset inactivity timer on own message
+            if (data.max_time) {
+                UI.startTimer(data.max_time);
+            }
         });
 
         wsClient.on('partnerLeft', () => {
@@ -92,6 +100,18 @@ const App = {
             console.log('Kicked due to inactivity');
             this.sessionId = null;
             UI.showInactivityScreen();
+        });
+
+        wsClient.on('conversationEnded', (data) => {
+            console.log('Conversation ended:', data.reason);
+            this.sessionId = null;
+            if (data.reason === 'time_up') {
+                UI.addSystemMessage('Tiden er ute! Samtalen er avsluttet. Du blir n\u00e5 satt i k\u00f8 igjen.');
+                UI.stopTimer();
+                UI.elements.sendBtn.disabled = true;
+                UI.elements.speechInput.disabled = true;
+                UI.elements.speechMicBtn.disabled = true;
+            }
         });
     },
 
@@ -121,11 +141,6 @@ const App = {
      */
     handleSend() {
         const { think, speech } = UI.getInputValues();
-
-        if (think.length < 10) {
-            UI.showError('Vennligst skriv minst 10 tegn i Tenk-feltet.');
-            return;
-        }
 
         if (!speech.trim()) {
             UI.showError('Vennligst skriv noe i feltet.');

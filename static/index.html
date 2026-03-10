@@ -77,9 +77,11 @@
                 <span id="connection-status" class="status-indicator disconnected" title="Connection status"></span>
             </div>
             <div id="topic-banner" class="topic-banner hidden">
+                <span class="topic-label">Tema:</span>
                 <span id="topic-text"></span>
             </div>
             <div class="header-right">
+                <span id="conversation-timer" class="conversation-timer hidden">00:00</span>
                 <button id="theme-toggle" class="btn btn-icon" title="Toggle dark/light mode">
                     <span class="theme-icon-light">&#9728;</span>
                     <span class="theme-icon-dark hidden">&#9790;</span>
@@ -119,7 +121,7 @@
                     <div class="textarea-wrapper">
                         <textarea
                             id="think-input"
-                            placeholder="Skriv dine private tanker her (minimum 10 tegn). 1- Hva fanger oppmerksomheten din? 2- Hvilke ideer dukker opp? 3- Hva er målet ditt? 4- Steg-for-steg-tenkning? 5- Hva er svaret ditt?"
+                            placeholder="Skriv dine private tanker her (minimum 50 tegn). 1- Hva fanger oppmerksomheten din? 2- Hvilke ideer dukker opp? 3- Hva er målet ditt? 4- Steg-for-steg-tenkning? 5- Hva er svaret ditt?"
                             rows="2"
                         ></textarea>
                         <button id="think-mic-btn" class="btn btn-icon btn-mic" title="Tale til tekst">
@@ -127,7 +129,7 @@
                         </button>
                     </div>
                     <div class="char-count">
-                        <span id="think-char-count">0</span>/10 tegn
+                        <span id="think-char-count">0</span>/50 tegn
                     </div>
                 </div>
 
