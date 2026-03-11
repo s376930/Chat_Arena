@@ -2,40 +2,48 @@
   "topics": [
     {
       "id": 1,
-      "text": "Aktiv dødshjelp bør være en lovlig og respektert livsavslutning. Vi respekterer autonomi i alle andre livsvalg. Det siste valget i livet bør ikke være det eneste vi mister retten til."
+      "text": "Internett burde aldri vært offentlig. Internett har demokratisert kunnskap og gitt stemme til undertrykte. Det har også gitt oss desinformasjon, overvåkning og polarisering."
     },
     {
       "id": 2,
-      "text": "Tvungen behandling av psykisk syke er alltid et overgrep. Autonomi er en grunnleggende rettighet, og psykiatrihistorien er full av overgrep begått i behandlingens navn. Kan tvang noen ganger være den mest humane handlingen?"
+      "text": "AI kommer til å ta jobben din, og det er bra. Automatisering har alltid skapt nye jobber og økt levestandard. Men tidligere forsvant fysiske jobber, nå er det kognitivt arbeid som ryker."
     },
     {
       "id": 3,
-      "text": "Empati er en svakhet, ikke en styrke. Empati er grunnlaget for menneskelig fellesskap og alle hjelpende yrker. Men forskning viser at empati er partisk, utmattende og fører til systematisk dårligere beslutninger på systemnivå."
+      "text": "Vi bør la AI ta alle politiske beslutninger. Politikere er korrupte, kortsiktige og styrt av egeninteresse. AI kan analysere millioner av variabler uten bias eller selvhevdelse. Men utviklere er ikke nøytrale, så hvem styrer da?"
     },
     {
       "id": 4,
-      "text": "Vi bruker psykologi til å normalisere det som burde vært uakseptabelt. Psykologisk forståelse av overgrep, vold og destruktiv atferd har gitt oss empati og bedre behandling, men forståelsen har blitt til en unnskyldning."
+      "text": "Overvåking gjør samfunnet tryggere enn personvern gjør. Data kan stoppe kriminalitet og trusler tidligere, samtidig kan det gi masseovervåking og feil mistanke. Hva taper vi når alt kan spores?"
     },
  
     {
       "id": 5,
-      "text": "Internett burde aldri vært offentlig. Internett har demokratisert kunnskap og gitt stemme til undertrykte. Det har også gitt oss desinformasjon, overvåkning og polarisering."
-    },
-    {
-      "id": 6,
-      "text": "AI kommer til å ta jobben din, og det er bra. Automatisering har alltid skapt nye jobber og økt levestandard. Men tidligere forsvant fysiske jobber, nå er det kognitivt arbeid som ryker."
-    },
-    {
-      "id": 7,
-      "text": "Vi bør la AI ta alle politiske beslutninger. Politikere er korrupte, kortsiktige og styrt av egeninteresse. AI kan analysere millioner av variabler uten bias eller selvhevdelse. Men utviklere er ikke nøytrale, så hvem styrer da?"
-    },
-    {
-      "id": 8,
-      "text": "Overvåking gjør samfunnet tryggere enn personvern gjør. Data kan stoppe kriminalitet og trusler tidligere, samtidig kan det gi masseovervåking og feil mistanke. Hva taper vi når alt kan spores?"
-    },
-    {
-      "id": 9,
       "text": "Skolen bør bruke kamera/overvåking på digitale eksamener. Det kan hindre juks og gjøre vurdering mer rettferdig. Samtidig kan det føles invaderende og gi stress. Er kontroll viktigere enn personvern?"
+    },
+    {
+      "id": 15,
+      "text": "Barn og unge bør ha strengere skjermregulering, fordi dagens miljø er designet for avhengighet og oppmerksomhetskapring."
+    },
+    {
+      "id": 16,
+      "text": "Streng regulering av unges skjermbruk kan gjøre mer skade enn nytte, fordi foreldreansvar og digital kompetanse fungerer bedre enn brede forbud."
+    },
+    {
+      "id": 17,
+      "text": "Tradisjonelle eksamensformer favoriserer kortsiktig memorering fremfor dypere faglig forståelse."
+    },
+    {
+      "id": 18,
+      "text": "Presseetikken i Norge bidrar i noen tilfeller til en asymmetrisk beskyttelse av maktpersoner."
+    },
+    {
+      "id": 19,
+      "text": "Individets klimafotavtrykk problematiseres sterkere enn selskapers utslipp, til tross for at sistnevnte har større påvirkningskraft."
+    },
+    {
+      "id": 20,
+      "text": "Algoritmer på sosiale medier forsterker konflikter fordi konflikt lønner seg for selskapene."
     }
   ],
   "tasks": [
