@@ -243,10 +243,12 @@ const UI = {
      * Update think character count and enable/disable speech input
      */
     updateThinkCharCount() {
-        const count = this.elements.thinkInput.value.length;
-        this.elements.thinkCharCount.textContent = count;
+        // Count characters
+        const text = this.elements.thinkInput.value;
+        const charCount = text.length;
+        this.elements.thinkCharCount.textContent = charCount;
 
-        const isValid = count >= 50;
+        const isValid = charCount >= 25;
         this.elements.thinkCharCount.parentElement.classList.toggle('valid', isValid);
         this.elements.speechInput.disabled = !isValid;
         this.elements.speechMicBtn.disabled = !isValid;
@@ -258,8 +260,10 @@ const UI = {
      * Update send button state
      */
     updateSendButton() {
-        const thinkValid = this.elements.thinkInput.value.length >= 50;
-        const speechValid = this.elements.speechInput.value.trim().length > 0;
+        // Require minimum 25 characters in think input
+        const text = this.elements.thinkInput.value;
+        const thinkValid = text.length >= 25;
+        const speechValid = this.elements.speechInput.value.length > 0;
         this.elements.sendBtn.disabled = !(thinkValid && speechValid);
     },
 
