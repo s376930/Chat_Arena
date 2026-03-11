@@ -579,7 +579,7 @@ async def handle_chat_message(user_id: str, data: dict):
 
     think = data.get("think", "")
     speech = data.get("speech", "")
-
+#
     # Validate think requirement
     if len(think) < MIN_THINK_CHARS:
         await manager.send_json(user_id, {
