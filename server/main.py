@@ -318,6 +318,13 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # ==================== HTML Routes ====================
 
+# ==================== Healthcheck Route ====================
+
+@app.get("/healthcheck")
+async def healthcheck():
+    """Healthcheck endpoint for service monitoring."""
+    return {"status": "ok"}
+
 @app.get("/")
 async def serve_index():
     """Serve the main chat interface."""
@@ -600,7 +607,7 @@ async def handle_chat_message(user_id: str, data: dict):
 
     # Store message
     storage_service.add_message(
-        session_id=session.session_id,
+        session_id=session.session_id, # type: ignore
         role=user_id,
         content=content,
         think=think,
@@ -707,7 +714,7 @@ async def transcribe_audio(audio: UploadFile = File(...)):
         raise HTTPException(status_code=503, detail="Whisper API not configured")
 
     try:
-        from openai import OpenAI
+        from openai import OpenAI # type: ignore
         client = OpenAI(api_key=OPENAI_API_KEY)
 
         # Read audio file
