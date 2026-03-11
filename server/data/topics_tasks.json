@@ -1,5 +1,5 @@
 {
-  "topics": [
+  "psychology_topics": [
     {
       "id": 1,
       "text": "Aktiv dødshjelp bør være en lovlig og respektert livsavslutning. Vi respekterer autonomi i alle andre livsvalg. Det siste valget i livet bør ikke være det eneste vi mister retten til."
@@ -15,6 +15,28 @@
     {
       "id": 4,
       "text": "Vi bruker psykologi til å normalisere det som burde vært uakseptabelt. Psykologisk forståelse av overgrep, vold og destruktiv atferd har gitt oss empati og bedre behandling, men forståelsen har blitt til en unnskyldning."
+    }
+  ],
+  "it_student_topics": [
+    {
+      "id": 1,
+      "text": "Internett burde aldri vært offentlig. Internett har demokratisert kunnskap og gitt stemme til undertrykte. Det har også gitt oss desinformasjon, overvåkning og polarisering."
+    },
+    {
+      "id": 2,
+      "text": "AI kommer til å ta jobben din, og det er bra. Automatisering har alltid skapt nye jobber og økt levestandard. Men tidligere forsvant fysiske jobber, nå er det kognitivt arbeid som ryker."
+    },
+    {
+      "id": 3,
+      "text": "Vi bør la AI ta alle politiske beslutninger. Politikere er korrupte, kortsiktige og styrt av egeninteresse. AI kan analysere millioner av variabler uten bias eller selvhevdelse. Men utviklere er ikke nøytrale, så hvem styrer da?"
+    },
+    {
+      "id": 4,
+      "text": "Overvåking gjør samfunnet tryggere enn personvern gjør. Data kan stoppe kriminalitet og trusler tidligere, samtidig kan det gi masseovervåking og feil mistanke. Hva taper vi når alt kan spores?"
+    },
+    {
+      "id": 5,
+      "text": "Skolen bør bruke kamera/overvåking på digitale eksamener. Det kan hindre juks og gjøre vurdering mer rettferdig. Samtidig kan det føles invaderende og gi stress. Er kontroll viktigere enn personvern?"
     }
   ],
   "tasks": [
