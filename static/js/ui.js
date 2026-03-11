@@ -47,6 +47,11 @@ const UI = {
         this.elements.speechMicBtn = document.getElementById('speech-mic-btn');
         this.elements.sendBtn = document.getElementById('send-btn');
 
+        // Timer
+        this.elements.conversationTimer = document.getElementById('conversation-timer');
+        this._timerInterval = null;
+        this._timerSecondsLeft = 0;
+
         // Footer
         this.elements.reassignBtn = document.getElementById('reassign-btn');
         this.elements.instructionsBtn = document.getElementById('instructions-btn');
@@ -176,7 +181,7 @@ const UI = {
     setConnectionStatus(connected) {
         this.elements.connectionStatus.classList.toggle('connected', connected);
         this.elements.connectionStatus.classList.toggle('disconnected', !connected);
-        this.elements.connectionStatus.title = connected ? 'Connected' : 'Disconnected';
+        this.elements.connectionStatus.title = connected ? 'Tilkoblet' : 'Frakoblet';
     },
 
     /**
@@ -189,26 +194,19 @@ const UI = {
         this.elements.topicBanner.classList.add('hidden');
         this.elements.queuePosition.textContent = position;
         this.elements.reassignBtn.disabled = true;
-    },
-
-    /**
-     * Update queue position
-     */
-    updateQueuePosition(position) {
-        this.elements.queuePosition.textContent = position;
+        this.stopTimer();
     },
 
     /**
      * Show chat interface after pairing
      */
-    showChat(topic, task) {
+    showChat(topic, task, maxTime) {
         this.elements.waitingScreen.classList.add('hidden');
         this.elements.chatContainer.classList.remove('hidden');
         this.elements.taskBar.classList.remove('hidden');
         this.elements.topicBanner.classList.remove('hidden');
 
         this.elements.topicText.textContent = topic;
-        this.elements.topicBanner.setAttribute('data-full-topic', topic);
         this.elements.topicBanner.setAttribute('title', topic);
         this.elements.taskText.textContent = task;
 
@@ -218,7 +216,12 @@ const UI = {
         this.elements.chatMessages.innerHTML = '';
 
         // Add system message
-        this.addSystemMessage('You have been paired with a partner. Start the conversation!');
+        this.addSystemMessage('Partner funnet!');
+
+        // Start countdown timer
+        if (maxTime) {
+            this.startTimer(maxTime);
+        }
 
         // Reset inputs
         this.resetInputs();
@@ -243,7 +246,7 @@ const UI = {
         const count = this.elements.thinkInput.value.length;
         this.elements.thinkCharCount.textContent = count;
 
-        const isValid = count >= 10;
+        const isValid = count >= 50;
         this.elements.thinkCharCount.parentElement.classList.toggle('valid', isValid);
         this.elements.speechInput.disabled = !isValid;
         this.elements.speechMicBtn.disabled = !isValid;
@@ -255,7 +258,7 @@ const UI = {
      * Update send button state
      */
     updateSendButton() {
-        const thinkValid = this.elements.thinkInput.value.length >= 10;
+        const thinkValid = this.elements.thinkInput.value.length >= 50;
         const speechValid = this.elements.speechInput.value.trim().length > 0;
         this.elements.sendBtn.disabled = !(thinkValid && speechValid);
     },
@@ -312,10 +315,53 @@ const UI = {
      * Show partner left message
      */
     showPartnerLeft() {
-        this.addSystemMessage('Your partner has left the conversation.');
+        this.addSystemMessage('Partneren din har forlatt samtalen.');
         this.elements.sendBtn.disabled = true;
         this.elements.speechInput.disabled = true;
         this.elements.speechMicBtn.disabled = true;
+        this.stopTimer();
+    },
+
+    /**
+     * Start the conversation countdown timer
+     */
+    startTimer(maxSeconds) {
+        this.stopTimer();
+        this._timerSecondsLeft = maxSeconds;
+        this.elements.conversationTimer.classList.remove('hidden');
+        this._updateTimerDisplay();
+
+        this._timerInterval = setInterval(() => {
+            this._timerSecondsLeft--;
+
+            if (this._timerSecondsLeft <= 0) {
+                this.stopTimer();
+                return;
+            }
+
+            this._updateTimerDisplay();
+        }, 1000);
+    },
+
+    /**
+     * Stop the conversation timer
+     */
+    stopTimer() {
+        if (this._timerInterval) {
+            clearInterval(this._timerInterval);
+            this._timerInterval = null;
+        }
+        this.elements.conversationTimer.classList.add('hidden');
+    },
+
+    /**
+     * Update the timer display
+     */
+    _updateTimerDisplay() {
+        const mins = Math.floor(this._timerSecondsLeft / 60);
+        const secs = this._timerSecondsLeft % 60;
+        this.elements.conversationTimer.textContent =
+            `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     },
 
     /**
@@ -345,6 +391,7 @@ const UI = {
         this.elements.taskBar.classList.add('hidden');
         this.elements.topicBanner.classList.add('hidden');
         this.elements.app.classList.add('hidden');
+        this.stopTimer();
 
         // Show inactivity modal
         this.elements.inactivityModal.classList.remove('hidden');

@@ -33,7 +33,7 @@ class StorageService:
         file_path = CONVERSATIONS_DIR / f"{conversation.session_id}.json"
         try:
             with open(file_path, "w", encoding="utf-8") as f:
-                f.write(json.dumps(conversation.model_dump(), indent=2))
+                f.write(json.dumps(conversation.model_dump(), indent=2, ensure_ascii=False))
             return True
         except Exception as e:
             print(f"Error saving conversation {conversation.session_id}: {e}")
@@ -74,7 +74,9 @@ class StorageService:
         self,
         session_id: str,
         role: str,
-        content: str
+        content: str,
+        think: str = None,
+        speech: str = None
     ) -> Optional[ConversationMessage]:
         """Add a message to a conversation and save to disk."""
         # Try to get from memory first
@@ -93,6 +95,8 @@ class StorageService:
         message = ConversationMessage(
             role=role,
             content=content,
+            think=think,
+            speech=speech,
             timestamp=datetime.utcnow().isoformat() + "Z"
         )
         conversation.messages.append(message)
@@ -120,7 +124,7 @@ class StorageService:
         file_path = CONVERSATIONS_DIR / f"{session_id}.json"
         try:
             async with aiofiles.open(file_path, "w", encoding="utf-8") as f:
-                await f.write(json.dumps(conversation.model_dump(), indent=2))
+                await f.write(json.dumps(conversation.model_dump(), indent=2, ensure_ascii=False))
 
             # Remove from memory cache
             if session_id in self._conversations:
@@ -150,7 +154,7 @@ class StorageService:
         """Save topics and tasks to JSON file."""
         try:
             async with aiofiles.open(TOPICS_TASKS_FILE, "w", encoding="utf-8") as f:
-                await f.write(json.dumps(data.model_dump(), indent=2))
+                await f.write(json.dumps(data.model_dump(), indent=2, ensure_ascii=False))
             return True
         except Exception as e:
             print(f"Error saving topics/tasks: {e}")
@@ -234,7 +238,7 @@ class StorageService:
         """Save consent configuration to JSON file."""
         try:
             async with aiofiles.open(CONSENT_FILE, "w", encoding="utf-8") as f:
-                await f.write(json.dumps(data.model_dump(), indent=2))
+                await f.write(json.dumps(data.model_dump(), indent=2, ensure_ascii=False))
             return True
         except Exception as e:
             print(f"Error saving consent: {e}")

@@ -10,10 +10,10 @@ from typing import Optional
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Header, Depends
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
-from .config import MIN_THINK_CHARS, OPENAI_API_KEY, BASE_DIR, LLM_CONFIG_FILE, PERSONAS_FILE, ADMIN_PASSWORD, DATA_DIR, CONVERSATIONS_DIR, INACTIVITY_TIMEOUT_SECONDS
+from .config import MIN_THINK_CHARS, OPENAI_API_KEY, BASE_DIR, LLM_CONFIG_FILE, PERSONAS_FILE, ADMIN_PASSWORD, DATA_DIR, CONVERSATIONS_DIR, INACTIVITY_TIMEOUT_SECONDS, MAX_CONVERSATION_SECONDS
 from .websocket_manager import manager
 from .pairing_service import pairing_service
 from .storage_service import storage_service
@@ -30,6 +30,9 @@ logger = logging.getLogger(__name__)
 
 # Global AI manager instance
 ai_manager: Optional[AIManager] = None
+
+# Track per-session inactivity timeout tasks
+_session_timeout_tasks: dict[str, asyncio.Task] = {}
 
 
 async def handle_ai_message(ai_id: str, think: str, speech: str):
@@ -51,7 +54,9 @@ async def handle_ai_message(ai_id: str, think: str, speech: str):
     storage_service.add_message(
         session_id=session_id,
         role=ai_id,
-        content=content
+        content=content,
+        think=think,
+        speech=speech
     )
 
     # Send to human partner (only the speech part)
@@ -223,6 +228,7 @@ async def handle_partner_breakup(partner_id: str, session_id: Optional[str], is_
 
     # End conversation if exists
     if session_id:
+        _cancel_session_timeout(session_id)
         await storage_service.end_conversation(session_id)
 
 
@@ -364,10 +370,6 @@ async def handle_message(user_id: str, data: dict):
 
     if msg_type == "ping":
         await manager.send_json(user_id, {"type": "pong"})
-    elif msg_type == "pong":
-        # Update last_pong timestamp when pong is received
-        from datetime import datetime
-        await manager.update_session(user_id, last_pong=datetime.now())
     elif msg_type == "join":
         await handle_join(user_id, data)
     elif msg_type == "message":
@@ -383,7 +385,7 @@ async def handle_join(user_id: str, data: dict):
     if not data.get("consent"):
         await manager.send_json(user_id, {
             "type": "error",
-            "message": "Consent required to participate"
+            "message": "Samtykke er påkrevd for å delta"
         })
         return
 
@@ -429,11 +431,11 @@ async def try_pairing(user_id: str):
         await pairing_service.add_to_queue_atomic(partner_id)
         await manager.send_json(user_id, {
             "type": "error",
-            "message": "No topics or tasks available. Please try again later."
+            "message": "Ingen emner eller oppgaver tilgjengelig. Prøv igjen senere."
         })
         await manager.send_json(partner_id, {
             "type": "error",
-            "message": "No topics or tasks available. Please try again later."
+            "message": "Ingen emner eller oppgaver tilgjengelig. Prøv igjen senere."
         })
         return
 
@@ -472,15 +474,77 @@ async def try_pairing(user_id: str):
         "type": "paired",
         "topic": topic.text,
         "task": tasks[0].text,
-        "session_id": session_id
+        "session_id": session_id,
+        "max_time": MAX_CONVERSATION_SECONDS
     })
 
     await manager.send_json(partner_id, {
         "type": "paired",
         "topic": topic.text,
         "task": tasks[1].text,
-        "session_id": session_id
+        "session_id": session_id,
+        "max_time": MAX_CONVERSATION_SECONDS
     })
+
+    # Schedule inactivity timeout (resets on each message)
+    _reset_session_timeout(session_id, user_id, partner_id)
+
+
+def _reset_session_timeout(session_id: str, user_id: str, partner_id: str):
+    """Cancel any existing timeout for this session and start a new one."""
+    old_task = _session_timeout_tasks.get(session_id)
+    if old_task and not old_task.done():
+        old_task.cancel()
+    _session_timeout_tasks[session_id] = asyncio.create_task(
+        conversation_timeout(session_id, user_id, partner_id, MAX_CONVERSATION_SECONDS)
+    )
+
+
+def _cancel_session_timeout(session_id: str):
+    """Cancel timeout task for a session."""
+    old_task = _session_timeout_tasks.pop(session_id, None)
+    if old_task and not old_task.done():
+        old_task.cancel()
+
+
+async def conversation_timeout(session_id: str, user_id: str, partner_id: str, seconds: int):
+    """End a conversation after inactivity timeout."""
+    await asyncio.sleep(seconds)
+
+    # Check if the conversation is still active
+    user_session = manager.get_session(user_id)
+    partner_session = manager.get_session(partner_id)
+
+    if not user_session or user_session.session_id != session_id:
+        return
+    if not partner_session or partner_session.session_id != session_id:
+        return
+
+    logger.info(f"Conversation {session_id} timed out after {seconds}s inactivity")
+
+    # Clean up timeout task reference
+    _session_timeout_tasks.pop(session_id, None)
+
+    # Notify both users
+    await manager.send_json(user_id, {"type": "conversation_ended", "reason": "time_up"})
+    await manager.send_json(partner_id, {"type": "conversation_ended", "reason": "time_up"})
+
+    # End the conversation in storage
+    await storage_service.end_conversation(session_id)
+
+    # Clear pairing for both users
+    await manager.clear_pairing_atomic(user_id)
+    await manager.clear_pairing_atomic(partner_id)
+
+    # Put both back in queue
+    pos1 = await pairing_service.add_to_queue_atomic(user_id)
+    await manager.send_json(user_id, {"type": "waiting", "position": pos1})
+    pos2 = await pairing_service.add_to_queue_atomic(partner_id)
+    await manager.send_json(partner_id, {"type": "waiting", "position": pos2})
+
+    # Try to pair them again (FIFO order in queue)
+    await try_pairing(user_id)
+    await try_pairing(partner_id)
 
 
 async def handle_chat_message(user_id: str, data: dict):
@@ -492,7 +556,7 @@ async def handle_chat_message(user_id: str, data: dict):
     if not session or not session.paired:
         await manager.send_json(user_id, {
             "type": "error",
-            "message": "You are not in an active chat session"
+            "message": "Du er ikke i en aktiv økt"
         })
         return
 
@@ -501,7 +565,7 @@ async def handle_chat_message(user_id: str, data: dict):
     if not partner_id:
         await manager.send_json(user_id, {
             "type": "error",
-            "message": "Partner connection lost"
+            "message": "Partnertilkoblingen ble brutt"
         })
         return
 
@@ -511,7 +575,7 @@ async def handle_chat_message(user_id: str, data: dict):
         if not partner_session or partner_session.partner_id != user_id:
             await manager.send_json(user_id, {
                 "type": "error",
-                "message": "Partner connection lost"
+                "message": "Partnertilkoblingen ble brutt"
             })
             # Clear the broken pairing
             await manager.clear_pairing_atomic(user_id)
@@ -527,14 +591,14 @@ async def handle_chat_message(user_id: str, data: dict):
     if len(think) < MIN_THINK_CHARS:
         await manager.send_json(user_id, {
             "type": "error",
-            "message": f"Think field must be at least {MIN_THINK_CHARS} characters"
+            "message": f"Tanke-feltet må være minst {MIN_THINK_CHARS} tegn"
         })
         return
 
     if not speech.strip():
         await manager.send_json(user_id, {
             "type": "error",
-            "message": "Speech field cannot be empty"
+            "message": "Tale-feltet kan ikke være tomt"
         })
         return
 
@@ -545,15 +609,21 @@ async def handle_chat_message(user_id: str, data: dict):
     storage_service.add_message(
         session_id=session.session_id, # type: ignore
         role=user_id,
-        content=content
+        content=content,
+        think=think,
+        speech=speech
     )
 
     timestamp = datetime.utcnow().isoformat() + "Z"
 
+    # Reset inactivity timeout for this conversation
+    _reset_session_timeout(session.session_id, user_id, partner_id)
+
     # Confirm to sender first (so their message appears in UI immediately)
     await manager.send_json(user_id, {
         "type": "message_sent",
-        "timestamp": timestamp
+        "timestamp": timestamp,
+        "max_time": MAX_CONVERSATION_SECONDS
     })
 
     # Check if partner is AI
@@ -568,7 +638,8 @@ async def handle_chat_message(user_id: str, data: dict):
         sent = await manager.send_to_partner(user_id, {
             "type": "partner_message",
             "content": speech,
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "max_time": MAX_CONVERSATION_SECONDS
         })
         if not sent:
             logger.warning(f"Failed to send message from {user_id} to partner {partner_id}")
