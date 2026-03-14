@@ -1,3 +1,13 @@
+## 14.03.2026
+Quality of Life improvements to be made:
+-sending message on hitting `Enter`
+
+Quick summary from Nettskjema (We'll do a review of the feedback in plenum)
+-Design -> Sleeker design (low effort options? style libs, premade css libs etc. equiv of Tailwind? Case for switching to TypeScrip with Next.js & Tailwind? Could keep python as an API
+for eventual AI side of the app)
+-Fun idea: make conversations last over days i.e Chess.com functionality, having multiple conversations (extrapolated idea: chat history)
+-Better definitions, some users experienced confusion, 1 ask for "dumbing down the explanation"
+(overall seems to lean towards a positive sentiment)
 ## 08.03.2026
 Quality of Life improvements to be made:
 -If a 10 min timer is hit and users get disconnected it saves an emtpy chatlog
