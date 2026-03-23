@@ -34,7 +34,7 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 XAI_API_KEY = os.getenv("XAI_API_KEY", "")
 
 # Minimum characters required in "think" field before "speech" is enabled
-MIN_THINK_CHARS = 50
+MIN_THINK_CHARS = 25
 
 # Maximum conversation duration in seconds (15 minutes)
 MAX_CONVERSATION_SECONDS = int(os.getenv("MAX_CONVERSATION_SECONDS", "900"))
