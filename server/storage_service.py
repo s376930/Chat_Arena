@@ -29,7 +29,11 @@ class StorageService:
     # ==================== Conversation Storage ====================
 
     def _save_conversation_sync(self, conversation: Conversation) -> bool:
-        """Synchronously save conversation to disk (for use in sync methods)."""
+        """Synchronously save conversation to disk (for use in sync methods). Skip if no messages."""
+        # Don't save empty conversations (0 messages)
+        if len(conversation.messages) == 0:
+            return True
+        
         file_path = CONVERSATIONS_DIR / f"{conversation.session_id}.json"
         try:
             with open(file_path, "w", encoding="utf-8") as f:
@@ -107,7 +111,7 @@ class StorageService:
         return message
 
     async def end_conversation(self, session_id: str) -> bool:
-        """End a conversation and save final state to disk."""
+        """End a conversation and save final state to disk. Skip if no messages."""
         # Try to get from memory first
         conversation = self._conversations.get(session_id)
 
@@ -119,6 +123,13 @@ class StorageService:
             return False
 
         conversation.ended_at = datetime.utcnow().isoformat() + "Z"
+
+        # Don't save empty conversations (0 messages)
+        if len(conversation.messages) == 0:
+            # Remove from memory cache
+            if session_id in self._conversations:
+                del self._conversations[session_id]
+            return True
 
         # Save final state to disk
         file_path = CONVERSATIONS_DIR / f"{session_id}.json"
