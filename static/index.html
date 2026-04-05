@@ -110,40 +110,24 @@
         <div id="chat-container" class="chat-container hidden">
             <!-- Chat Messages -->
             <div id="chat-messages" class="chat-messages"></div>
-
+            
             <!-- Input Area -->
-                <!-- Instructions Box -->
-                <div class="instructions-container">
-                    <div class="instructions-box">
-                        <strong>Instructions:</strong>
-                        <ol>
-                            <li>Hva fanger oppmerksomheten din?</li>
-                            <li>Hvilke ideer dukker opp?</li>
-                            <li>Hva er målet ditt?</li>
-                            <li>Steg-for-steg-tenkning?</li>
-                            <li>Hva er svaret ditt?</li>
-                        </ol>
-                    </div>
-                </div>
-
             <div class="input-area">
                 <!-- Think Input -->
                 <div class="input-group">
-                    <label for="think-input">
-                        Tenk <span class="hint">(privat – vises ikke til partneren)</span>
-                    </label>
+                    <label for="think-input"><strong>Tenk</strong> <span class="hint">(privat – vises ikke til partneren)</span></label>
                     <div class="textarea-wrapper">
                         <textarea
-                                id="think-input"
-                                placeholder="Skriv dine private tanker her (minimum 25 tegn)"
-                                rows="2"
+                            id="think-input"
+                            placeholder="Skriv dine private tanker her (minimum 50 tegn)"
+                            rows="2"
                         ></textarea>
                         <button id="think-mic-btn" class="btn btn-icon btn-mic" title="Tale til tekst">
                             &#127908;
                         </button>
                     </div>
                     <div class="char-count">
-                            <span id="think-char-count">0</span>/25 tegn
+                        <span id="think-char-count">0</span>/50 tegn
                     </div>
                 </div>
 
