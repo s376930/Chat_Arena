@@ -495,18 +495,6 @@ body {
     border-top: 1px solid var(--border-color);
 }
 
-.input-group {
-    margin-bottom: 8px;
-}
-
-.input-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 4px;
-    color: var(--text-primary);
-}
-
 .hint {
     font-weight: normal;
     color: var(--text-hint);
@@ -546,48 +534,22 @@ body {
     cursor: not-allowed;
 }
 
-.instructions-container {
-    margin-bottom: 12px;
-}
 
-.instructions-label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: 6px;
-    display: block;
-}
 
 .instructions-box {
-    background-color: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 8px 12px;
-    color: var(--text-secondary);
-    font-size: 12px;
-    line-height: 1.4;
+    display: none;
 }
 
 .instructions-box ol {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-    list-style: none;
+    display: none;
 }
 
 .instructions-box li {
-    margin: 0;
-    padding: 0;
-    display: inline;
+    display: none;
 }
 
 .instructions-box li:not(:last-child)::after {
-    content: " • ";
-    margin-left: 8px;
-    color: var(--text-hint);
+    display: none;
 }
 
 .char-count {
