@@ -59,9 +59,6 @@ const UI = {
         // Initialize theme
         this.initTheme();
 
-        // Add think instructions (dynamically)
-        this.addThinkInstructions();
-
         // Setup event listeners
         this.setupEventListeners();
     },
@@ -412,12 +409,6 @@ const UI = {
         this.elements.app.classList.remove('hidden');
     },
 
-    /**
-     * Add think input instructions dynamically
-     */
-    addThinkInstructions() {
-        // Instructions now in HTML, no dynamic addition needed
-    }
 };
 
 // Export
