@@ -41,131 +41,131 @@
   "tasks": [
     {
       "id": 1,
-      "text": "ANGREP: Gjør alt du kan for å være uenig i alle punktene den andre personen kommer med."
+      "text": "ANGREP: Vær fullstendig uenig i hva motparten sier."
     },
     {
       "id": 2,
-      "text": "ANGREP: Start rolig og nøytralt, still åpne spørsmål og la motparten legge frem hele posisjonen sin. Bruk så det de sier til å bygge angrepet ditt."
+      "text": "ANGREP: Still åpne spørsmål først, deretter bygg et angrep."
     },
     {
       "id": 3,
-      "text": "ANGREP: Vis at motpartens forslag bryter med verdier de selv sier de støtter."
+      "text": "ANGREP: Vis at motparten motstrider sine egne verdier."
     },
     {
       "id": 4,
-      "text": "ANGREP: Gå til personangrep istedenfor å argumentere. Still spørsmål ved om motparten har nok kunnskap eller erfaring til å uttale seg om temaet."
+      "text": "ANGREP: Utfordre og still spørsmål til motpartens kunnskap/erfaring."
     },
     {
       "id": 5,
-      "text": "ANGREP: Argumenter for at motpartens forslag vil føre til negative konsekvenser på lang sikt."
+      "text": "ANGREP: Beskriv negative langtidskonsekvenser."
     },
     {
       "id": 6,
-      "text": "ANGREP: Still spørsmål ved om motpartens løsning faktisk er realistisk å gjennomføre."
+      "text": "ANGREP: Vis at løsningen ikke er realistisk å gjennomføre."
     },
     {
       "id": 7,
-      "text": "ANGREP: Sammenlign motpartens løsning med et bedre alternativ og vis hvorfor motpartens løsning er svakere."
+      "text": "ANGREP: Sammenlign motpartens løsning med et bedre alternativ."
     },
     {
       "id": 8,
-      "text": "ANGREP: Press motparten og vis at du har en løsning som fungerer bedre."
+      "text": "ANGREP: Press motparten og vis at du har en bedre løsning."
     },
     {
       "id": 9,
-      "text": "ANGREP: Krev presisering av hvert eneste nye begrep motparten bruker."
+      "text": "ANGREP: Krev presisering av alle nye begreper fra motparten."
     },
     {
       "id": 10,
-      "text": "ANGREP: Finn svakheter i motpartens argumenter og bagatelliser dem."
+      "text": "ANGREP: Finn og bagatelliser motpartens svakheter."
     },
     {
       "id": 11,
-      "text": "ANGREP: Snu argumentet tilbake på motparten, krev bevis og gi moteksempler."
+      "text": "ANGREP: Gi moteksempler og krev bevis fra motparten."
     },
     {
       "id": 12,
-      "text": "ANGREP: Få motparten til å forklare sine argumenter om og om igjen, uten å svare selv."
+      "text": "ANGREP: Få motparten til å forklare seg om og om igjen."
     },
     {
       "id": 13,
-      "text": "ANGREP: Endre temaet brått til noe som ikke har med debatten å gjøre."
+      "text": "ANGREP: Endra tema brått til noe urelevant."
     },
     {
       "id": 14,
-      "text": "ANGREP: Dra motpartens påstand til sin mest ekstreme logiske konsekvens, slik at den fremstår som absurd."
+      "text": "ANGREP: Tolk motpartens påstand som absurd og ekstrem."
     },
     {
       "id": 15,
-      "text": "ANGREP: Still spørsmål som er helt irrelevante for temaet."
+      "text": "ANGREP: Still irrelevante spørsmål om temaet."
     },
     {
       "id": 16,
-      "text": "ANGREP: Avbryt motparten midt i argumentet og still hypotetiske spørsmål som ikke kan besvares."
+      "text": "ANGREP: Avbryt motparten med hypotetiske spørsmål som ikke kan besvares."
     },
     {
       "id": 17,
-      "text": "ANGREP: Bevisst misforstå motpartens argumenter til det ekstreme."
+      "text": "ANGREP: Misforstå motpartens argumenter bevisst."
     },
     {
       "id": 18,
-      "text": "FORSVAR: Når du blir kritisert, spør hva motparten konkret foreslår i stedet, og sammenlign realistiske alternativer."
+      "text": "FORSVAR: Spør hva motparten konkret foreslår, og sammenlign realistiske alternativer."
     },
     {
       "id": 19,
-      "text": "FORSVAR: Forklar hvorfor du er enig i påstanden beskrevet. Bruk konsekvenser til å forsvare."
+      "text": "FORSVAR: Forklar hvorfor du er enig i påstanden og bruk konsekvenser."
     },
     {
       "id": 20,
-      "text": "FORSVAR: Knytt ditt standpunkt tydelig til grunnleggende verdier og vis at forslaget ditt beskytter verdiene bedre."
+      "text": "FORSVAR: Knytt argumentet ditt til det som er viktig."
     },
     {
       "id": 21,
-      "text": "FORSVAR: Forklar tydelig hvordan løsningen kan implementeres i praksis."
+      "text": "FORSVAR: Forklar praktisk implementering av løsningen."
     },
     {
       "id": 22,
-      "text": "FORSVAR: Formuler en tydelig hovedpåstand som du holder deg til under hele debatten."
+      "text": "FORSVAR: Hold en tydelig hovedpåstand under hele debatten."
     },
     {
       "id": 23,
-      "text": "FORSVAR: Forklar hvorfor dette problemet er viktig, og vis at kostnaden av å vente er høyere enn kostnaden ved å handle nå."
+      "text": "FORSVAR: Vis at kostnaden av å vente med problemløsningen er høy."
     },
     {
       "id": 24,
-      "text": "FORSVAR: Omformuler motstanderens argument så det passer til ditt argument."
+      "text": "FORSVAR: Gjør motpartens argument til ditt eget argument."
     },
     {
       "id": 25,
-      "text": "FORSVAR: Anerkjenn ulempene ved dine påstander, så vis at fordelene er større."
+      "text": "FORSVAR: Anerkjenn ulemper, vis større fordeler."
     },
     {
       "id": 26,
-      "text": "FORSVAR: Still spørsmål som avslører hull i motpartens logikk."
+      "text": "FORSVAR: Still spørsmål som avslører problemer i motpartens argumenter."
     },
     {
       "id": 27,
-      "text": "FORSVAR: Bygg hele argumentet rundt hvem som bærer konsekvensene og om det er rettferdig."
+      "text": "FORSVAR: Fokuser på rettferdighet og konsekvenser i argumentet ditt."
     },
     {
       "id": 28,
-      "text": "FORSVAR: Styr samtalen tilbake til ditt sterkeste punkt hver gang motparten beveger seg vekk fra det."
+      "text": "FORSVAR: Returner samtalen til ditt sterkeste punkt når motparten beveger seg fra det."
     },
     {
       "id": 29,
-      "text": "FORSVAR: Ta alt motstanderen sier som personangrep, og hold deg til påstanden din."
+      "text": "FORSVAR: Ta alt motstanderen sier som personangrep, og hold påstanden din."
     },
     {
       "id": 30,
-      "text": "FORSVAR: Be motparten om å forklare det svakeste leddet i argumentet sitt mer presist, og bruk svaret mot dem."
+      "text": "FORSVAR: Bruk motpartens svakeste punkt mot dem."
     },
     {
       "id": 31,
-      "text": "FORSVAR: Still spørsmål som er vanskelig for motparten å svare på, bruk dette for å belyse at dine påstander er bedre."
+      "text": "FORSVAR: Stil vanskelige spørsmål som er umulige å besvare."
     },
     {
       "id": 32,
-      "text": "FORSVAR: Vær så nøytral som mulig, ikke kom med noe spesifikk argumentasjon."
+      "text": "FORSVAR: Vær helt nøytral, ikke ta stilling til noe."
     }
   ]
 }

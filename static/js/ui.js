@@ -416,22 +416,7 @@ const UI = {
      * Add think input instructions dynamically
      */
     addThinkInstructions() {
-        // Find the think input label
-        const thinkLabel = document.querySelector('label[for="think-input"]');
-        if (!thinkLabel) return;
-
-        // Check if instructions div already exists
-        const existingInstructions = thinkLabel.parentElement.querySelector('.think-instructions-dynamic');
-        if (existingInstructions) return;
-
-        // Create instructions div
-        const instructionsDiv = document.createElement('div');
-        instructionsDiv.className = 'think-instructions-dynamic';
-        instructionsDiv.style.cssText = 'color: #667781; font-size: 12px; margin: 6px 0 8px 0; line-height: 1.4; font-weight: normal;';
-        instructionsDiv.textContent = '1. Hva fanger oppmerksomheten din?  2. Hvilke ideer dukker opp?  3. Hva er målet ditt?  4. Steg-for-steg-tenkning?  5. Hva er svaret ditt?';
-
-        // Insert after label
-        thinkLabel.parentElement.insertBefore(instructionsDiv, thinkLabel.nextSibling);
+        // Instructions now in HTML, no dynamic addition needed
     }
 };
 

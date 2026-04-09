@@ -44,15 +44,15 @@
 
                 <h3>Sende meldinger</h3>
                 <ol>
-                    <li><strong>Tenk:</strong> Skriv tankegangen din på følgende måte: <ol><li>Siter eller omskriv meldingen du nettopp leste.</li>
-                        <li>Det som skiller seg ut: Legg merke til ord, uttrykk, tone eller følelser som fanger oppmerksomheten din med en gang (f.eks. «Ordet 'haster' hopper ut – føles pressende»).</li>
-                        <li>Ideer som dukker opp: List opp spontane tanker, assosiasjoner, minner, spørsmål eller magefølelser (fragmenter er helt greit).</li>
-                        <li>Mitt mål med svaret: Si hva du prøver å oppnå (f.eks. «Være høflig men ærlig», «Få mer info», eller flere mål).</li>
-                        <li>Steg-for-steg-tenkning: Nummerer stegene i resonnementet ditt mens du bestemmer hva du skal si (f.eks. 1. Vurder direkte svar... 2. Men det kan støte... 3. Myke opp med emoji).</li>
-                        <li>Svar: Skriv svaret ditt til partneren din.</li>
+                    <li><strong>Tenk:</strong> <ol>
+                        <li>Sitér/omskriv hva du nettopp leste.</li>
+                        <li>Hva stikker ut (ord, tone, følelser)?</li>
+                        <li>Hvilke tanker dukker opp?</li>
+                        <li>Hva prøver du å oppnå?</li>
+                        <li>Bestem hva du skal si.</li>
                         </ol></li>
-                    <li><strong>Tale:</strong> Skriv det du vil sende til partneren din. Dette feltet aktiveres etter at du har skrevet nok i Tanke-feltet.</li>
-                    <li>Klikk <strong>Send</strong> eller trykk <strong>Ctrl+Enter</strong> for å sende meldingen.</li>
+                    <li><strong>Tale:</strong> Skriv hva du vil sende. Aktiveres når Tenk har nok tegn.</li>
+                    <li>Klikk <strong>Send</strong> eller trykk <strong>Ctrl+Enter</strong>.</li>
                 </ol>
 
                 <h3>Tale-til-tekst</h3>
@@ -115,11 +115,12 @@
             <div class="input-area">
                 <!-- Think Input -->
                 <div class="input-group">
-                    <label for="think-input"><strong>Tenk</strong> <span class="hint">(privat – vises ikke til partneren)</span></label>
+                    <label for="think-input">Tenk <span class="hint">(privat – vises ikke til partneren)</span></label>
+                    <div class="think-guidance">1. Hva fanger oppmerksomheten din?  2. Hvilke ideer dukker opp?  3. Hva er målet ditt?  4. Steg-for-steg-tenkning?  5. Hva er svaret ditt?</div>
                     <div class="textarea-wrapper">
                         <textarea
                             id="think-input"
-                            placeholder="Skriv dine private tanker her (minimum 50 tegn)"
+                            placeholder="Skriv dine private tanker her (minimum 25 tegn)"
                             rows="2"
                         ></textarea>
                         <button id="think-mic-btn" class="btn btn-icon btn-mic" title="Tale til tekst">
@@ -127,7 +128,7 @@
                         </button>
                     </div>
                     <div class="char-count">
-                        <span id="think-char-count">0</span>/50 tegn
+                        <span id="think-char-count">0</span>/25 tegn
                     </div>
                 </div>
 
