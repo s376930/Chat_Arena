@@ -159,6 +159,8 @@ const Admin = {
         // Download all conversations
         document.getElementById('download-all-conversations').addEventListener('click', () => this.downloadAllConversations());
 
+        document.getElementById('delete-empty-conversations').addEventListener('click', () => this.deleteEmptyConversations());
+
         // Delete all conversations
         document.getElementById('delete-all-conversations').addEventListener('click', () => this.deleteAllConversations());
 
@@ -622,6 +624,31 @@ const Admin = {
         } catch (e) {
             console.error('Failed to download conversations:', e);
             this.showToast('Failed to download conversations', 'error');
+        }
+    },
+
+    /**
+     * Delete empty conversations (no messages)
+     */
+    async deleteEmptyConversations() {
+        if (!confirm('Are you sure you want to delete all empty conversations (with no messages)?')) return;
+
+        try {
+            const response = await this.apiRequest('/api/admin/conversations-delete-empty', {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to delete');
+            }
+
+            const result = await response.json();
+            this.showToast(`Deleted ${result.deleted_count} empty conversations`, 'success');
+            this.loadConversations();
+        } catch (e) {
+            console.error('Failed to delete empty conversations:', e);
+            this.showToast(e.message || 'Failed to delete empty conversations', 'error');
         }
     },
 
