@@ -154,11 +154,9 @@ class PairingService:
         return random.choice(self._topics)
 
     def get_random_tasks(self, count: int = 2) -> list[Task]:
-        """Get random tasks for participants (different tasks for each)."""
-        if not self._tasks:
+        """Get random tasks for participants (must be different)."""
+        if not self._tasks or len(self._tasks) < count:
             return []
-        if len(self._tasks) < count:
-            return self._tasks.copy()
         return random.sample(self._tasks, count)
 
     def generate_session_id(self) -> str:

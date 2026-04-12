@@ -20,51 +20,51 @@
     <!-- Inactivity Modal -->
     <div id="inactivity-modal" class="modal hidden">
         <div class="modal-content inactivity-content">
-            <h2>Are you there?</h2>
+            <h2>Er du der?</h2>
             <div class="inactivity-text">
-                <p>You have been inactive for too long and were removed from your conversation.</p>
-                <p>This is a debate chat arena where participants engage in real-time discussions. Being inactive disrupts the experience for your conversation partner.</p>
-                <p>Please only join when you are ready to actively participate in a conversation.</p>
+                <p>Du har vært inaktiv for lenge og ble fjernet fra samtalen.</p>
+                <p>Dette er en debatt-arena der deltakere diskuterer i sanntid. Å være inaktiv forstyrrer opplevelsen for samtalepartneren din.</p>
+                <p>Vennligst bli med kun når du er klar til å delta aktivt i en samtale.</p>
             </div>
-            <button id="return-btn" class="btn btn-primary btn-large">Press here when you are ready to chat</button>
+            <button id="return-btn" class="btn btn-primary btn-large">Trykk her når du er klar til å chatte</button>
         </div>
     </div>
 
     <!-- Instructions Modal -->
     <div id="instructions-modal" class="modal hidden">
         <div class="modal-content">
-            <h2>How to Use Chat Arena</h2>
+            <h2>Slik bruker du Chat Arena</h2>
             <div class="instructions-content">
-                <h3>Getting Started</h3>
+                <h3>Kom i gang</h3>
                 <ol>
-                    <li>After agreeing to the consent form, you'll be placed in a queue</li>
-                    <li>Once paired with another participant, you'll both receive a conversation topic</li>
-                    <li>You'll also receive a hidden task that only you can see</li>
+                    <li>Etter å ha godtatt samtykkeskjemaet, blir du plassert i en kø</li>
+                    <li>Når du blir paret med en annen deltaker, får dere begge et samtaleemne</li>
+                    <li>Du får også en skjult oppgave som bare du kan se</li>
                 </ol>
 
-                <h3>Sending Messages</h3>
+                <h3>Sende meldinger</h3>
                 <ol>
-                    <li><strong>Think:</strong>Write your train of thoughts in the following manner: <ol><li>Quote or paraphrase the message you just read.</li>
-                        <li>What Stands Out: Note words, phrases, tone, or feelings that grab your attention right away (e.g., "The word 'urgent' jumps out—feels pushy").</li>
-                        <li>Ideas That Pop Up: List any spontaneous thoughts, associations, memories, questions, or gut feelings (fragments are fine).</li>
-                        <li>My Goal(s) for Replying: State what you're trying to achieve (e.g., "Be polite but honest," "Get more info," or multiple goals).</li>
-                        <li>Step-by-Step Thinking: Number the steps in your reasoning as you decide what to say (e.g., 1. Consider direct answer... 2. But it might offend... 3. Soften it with emoji).</li>
-                        <li>Reply: Write your response to your partner.</li>
+                    <li><strong>Tenk:</strong> <ol>
+                        <li>Sitér/omskriv hva du nettopp leste.</li>
+                        <li>Hva stikker ut (ord, tone, følelser)?</li>
+                        <li>Hvilke tanker dukker opp?</li>
+                        <li>Hva prøver du å oppnå?</li>
+                        <li>Bestem hva du skal si.</li>
                         </ol></li>
-                    <li><strong>Speech:</strong> Write what you want to send to your partner. This field is enabled after you've written enough in the Think field.</li>
-                    <li>Click <strong>Send</strong> or press <strong>Ctrl+Enter</strong> to send your message.</li>
+                    <li><strong>Tale:</strong> Skriv hva du vil sende. Aktiveres når Tenk har nok tegn.</li>
+                    <li>Klikk <strong>Send</strong> eller trykk <strong>Ctrl+Enter</strong>.</li>
                 </ol>
 
-                <h3>Speech-to-Text</h3>
-                <p>Click the microphone icon to use speech-to-text. Your browser may ask for microphone permission.</p>
+                <h3>Tale-til-tekst</h3>
+                <p>Klikk på mikrofonikonet for å bruke tale-til-tekst. Nettleseren din kan be om mikrofontillatelse.</p>
 
-                <h3>Other Controls</h3>
+                <h3>Andre kontroller</h3>
                 <ul>
-                    <li><strong>Find New Partner:</strong> Leave current conversation and find a new partner</li>
-                    <li><strong>Dark/Light Mode:</strong> Toggle theme using the button in the header</li>
+                    <li><strong>Finn ny partner:</strong> Forlat nåværende samtale og finn en ny partner</li>
+                    <li><strong>Mørk/lys modus:</strong> Bytt tema med knappen i topplinjen</li>
                 </ul>
             </div>
-            <button id="close-instructions-btn" class="btn btn-primary">Got It</button>
+            <button id="close-instructions-btn" class="btn btn-primary">Forstått</button>
         </div>
     </div>
 
@@ -77,9 +77,11 @@
                 <span id="connection-status" class="status-indicator disconnected" title="Connection status"></span>
             </div>
             <div id="topic-banner" class="topic-banner hidden">
+                <span class="topic-label">Tema:</span>
                 <span id="topic-text"></span>
             </div>
             <div class="header-right">
+                <span id="conversation-timer" class="conversation-timer hidden">00:00</span>
                 <button id="theme-toggle" class="btn btn-icon" title="Toggle dark/light mode">
                     <span class="theme-icon-light">&#9728;</span>
                     <span class="theme-icon-dark hidden">&#9790;</span>
@@ -90,7 +92,7 @@
         <!-- Task Reminder Bar -->
         <div id="task-bar" class="task-bar hidden">
             <div class="task-content">
-                <span class="task-label">Your Task:</span>
+                <span class="task-label">Din oppgave:</span>
                 <span id="task-text"></span>
             </div>
         </div>
@@ -99,8 +101,8 @@
         <div id="waiting-screen" class="waiting-screen hidden">
             <div class="waiting-content">
                 <div class="spinner"></div>
-                <h2>Waiting for a partner...</h2>
-                <p>Position in queue: <span id="queue-position">1</span></p>
+                <h2>Venter på en partner...</h2>
+                <p>Posisjon i køen: <span id="queue-position">1</span></p>
             </div>
         </div>
 
@@ -108,42 +110,41 @@
         <div id="chat-container" class="chat-container hidden">
             <!-- Chat Messages -->
             <div id="chat-messages" class="chat-messages"></div>
-
+            
             <!-- Input Area -->
             <div class="input-area">
                 <!-- Think Input -->
                 <div class="input-group">
-                    <label for="think-input">
-                        Think <span class="hint">(private - not shown to partner)</span>
-                    </label>
+                    <label for="think-input">Tenk <span class="hint">(privat – vises ikke til partneren)</span></label>
+                    <div class="think-guidance">1. Hva fanger oppmerksomheten din?  2. Hvilke ideer dukker opp?  3. Hva er målet ditt?  4. Steg-for-steg-tenkning?  5. Hva er svaret ditt?</div>
                     <div class="textarea-wrapper">
                         <textarea
                             id="think-input"
-                            placeholder="Write your private thoughts here (minimum 10 characters). 1- what calls your attention? 2- what ideas emerge? 3- what is your goal? 4- Step-by-step thinking? 5- what is your reply?"
+                            placeholder="Skriv dine private tanker her (minimum 25 tegn)"
                             rows="2"
                         ></textarea>
-                        <button id="think-mic-btn" class="btn btn-icon btn-mic" title="Speech to text">
+                        <button id="think-mic-btn" class="btn btn-icon btn-mic" title="Tale til tekst">
                             &#127908;
                         </button>
                     </div>
                     <div class="char-count">
-                        <span id="think-char-count">0</span>/10 characters
+                        <span id="think-char-count">0</span>/25 tegn
                     </div>
                 </div>
 
                 <!-- Speech Input -->
                 <div class="input-group">
                     <label for="speech-input">
-                        Speech <span class="hint">(sent to partner)</span>
+                        Tale <span class="hint">(sendes til partneren)</span>
                     </label>
                     <div class="textarea-wrapper">
                         <textarea
                             id="speech-input"
-                            placeholder="Write what you want to say to your partner..."
+                            placeholder="Skriv det du vil si til partneren din..."
                             rows="2"
                             disabled
                         ></textarea>
-                        <button id="speech-mic-btn" class="btn btn-icon btn-mic" title="Speech to text" disabled>
+                        <button id="speech-mic-btn" class="btn btn-icon btn-mic" title="Tale til tekst" disabled>
                             &#127908;
                         </button>
                     </div>
@@ -159,10 +160,10 @@
         <!-- Footer Controls -->
         <footer class="footer">
             <button id="reassign-btn" class="btn btn-secondary" disabled>
-                &#128260; Find New Partner
+                &#128260; Finn ny partner
             </button>
             <button id="instructions-btn" class="btn btn-secondary">
-                &#10067; Instructions
+                &#10067; Instruksjoner
             </button>
         </footer>
     </div>

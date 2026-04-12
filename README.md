@@ -30,6 +30,18 @@ pip install -r requirements.txt
 python run.py
 ```
 
+For hosted/server deployments that should persist conversations in `disk/`:
+
+```bash
+python run.py --conversations-dir /disk/conversations
+```
+
+To use a custom conversations path (for example, mounted external storage):
+
+```bash
+python run.py --conversations-dir /path/to/persistent/conversations
+```
+
 ### 3. Access the Application
 
 - **Chat Interface**: http://localhost:8000
@@ -46,6 +58,7 @@ python run.py
 | `OPENAI_API_KEY` | OpenAI API key for Whisper & GPT | (optional) |
 | `ANTHROPIC_API_KEY` | Anthropic API key for Claude | (optional) |
 | `XAI_API_KEY` | X.AI API key for Grok | (optional) |
+| `CHAT_ARENA_CONVERSATIONS_DIR` | Override conversations storage folder | `server/data/conversations` |
 
 ### Data Files
 

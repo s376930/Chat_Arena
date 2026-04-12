@@ -133,6 +133,9 @@ class WebSocketClient {
             case 'inactivity_kick':
                 this.trigger('inactivityKick', data);
                 break;
+            case 'conversation_ended':
+                this.trigger('conversationEnded', data);
+                break;
             case 'error':
                 this.trigger('serverError', data);
                 break;
