@@ -159,6 +159,21 @@ class PairingService:
             return []
         return random.sample(self._tasks, count)
 
+    def get_opposing_tasks(self) -> list[Task]:
+        """Get one ANGREP task and one FORSVAR task in random participant order."""
+        if not self._tasks:
+            return []
+
+        attack_tasks = [t for t in self._tasks if t.text.strip().upper().startswith("ANGREP:")]
+        defend_tasks = [t for t in self._tasks if t.text.strip().upper().startswith("FORSVAR:")]
+
+        if not attack_tasks or not defend_tasks:
+            return []
+
+        chosen = [random.choice(attack_tasks), random.choice(defend_tasks)]
+        random.shuffle(chosen)
+        return chosen
+
     def generate_session_id(self) -> str:
         """Generate a unique session ID for a conversation."""
         return uuid.uuid4().hex[:12]

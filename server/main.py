@@ -87,7 +87,7 @@ async def pair_with_ai(user_id: str) -> bool:
     try:
         # Get topic and tasks
         topic = pairing_service.get_random_topic()
-        tasks = pairing_service.get_random_tasks(2)
+        tasks = pairing_service.get_opposing_tasks()
 
         if not topic or len(tasks) < 2:
             logger.warning("No topics/tasks available for AI pairing")
@@ -423,7 +423,7 @@ async def try_pairing(user_id: str):
 
     # Get random topic and tasks
     topic = pairing_service.get_random_topic()
-    tasks = pairing_service.get_random_tasks(2)
+    tasks = pairing_service.get_opposing_tasks()
 
     if not topic or len(tasks) < 2:
         # Put both back in queue if no topics/tasks available
